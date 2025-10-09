@@ -21,12 +21,19 @@ public class ChannelServices(IChannelRepository _channelRepository, IValidator<C
         if (dto.IsDirect)
         {
             channel.Name = $"{dto.CurrentUser.UserName}-{dto.TargertUser!.UserName}";
-            channel.Users = new List<AppUser> { dto.CurrentUser, dto.TargertUser };
+            channel.ChannelUsers = new List<ChannelUser>
+            {
+                new ChannelUser { User = dto.CurrentUser, Channel = channel},
+                new ChannelUser { User = dto.TargertUser, Channel = channel}
+            };
         }
         else
         {
             channel.Name = dto.ChannelName!;
-            channel.Users = new List<AppUser> { dto.CurrentUser };
+            channel.ChannelUsers = new List<ChannelUser>
+            {
+                new ChannelUser { User = dto.CurrentUser, Channel = channel},
+            };
         }
 
         await _channelRepository.CreateAsync(channel);

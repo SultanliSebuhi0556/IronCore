@@ -7,8 +7,8 @@ public static class ServiceRegistrationAPI
 {
     public static IServiceCollection AddCustomServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddBlServices();
         services.AddDalServices(configuration);
+        services.AddBlServices();
         return services;
     }
 }

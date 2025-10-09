@@ -14,7 +14,7 @@ public static class ServiceRegistrationsDAL
     {
         services.AddRepositories();
         services.AddIdentity();
-        services.AddServer(configuration);
+        services.AddDbContext(configuration);
         return services;
     }
     private static IServiceCollection AddRepositories(this IServiceCollection services)
@@ -24,11 +24,11 @@ public static class ServiceRegistrationsDAL
         return services;
     }
 
-    private static IServiceCollection AddServer(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<AppDbContext>(opt =>
         {
-            opt.UseNpgsql(configuration.GetConnectionString("Local"));
+            opt.UseNpgsql(configuration.GetConnectionString("PostgreSQL"));
         });
         return services;
     }

@@ -6,7 +6,7 @@ namespace PcAsCloud.DAL.Context;
 
 public class AppDbContext : IdentityUserContext<AppUser>
 {
-    public AppDbContext(DbContextOptions options) : base(options) { }
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<Channel> Channels { get; set; }
     public DbSet<Message> Messages { get; set; }

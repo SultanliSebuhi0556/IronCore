@@ -30,7 +30,7 @@ public class MessageService(
         {
             Content = dto.Content,
             SendedBy = user,
-            ChannelId = dto.ChannelId,
+            ChannelId = Guid.Parse(dto.ChannelId),
         };
 
         if (dto.File != null)
