@@ -1,0 +1,12 @@
+﻿namespace PcAsCloud.CORE.Entities;
+
+public class ChannelUser
+{
+    public Guid ChannelId { get; set; }
+    public Channel Channel { get; set; }
+
+    public string UserId { get; set; }
+    public AppUser User { get; set; }
+
+    public DateTime JoinedDate { get; set; } = DateTime.UtcNow;
+}

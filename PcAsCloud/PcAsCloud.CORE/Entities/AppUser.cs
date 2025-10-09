@@ -3,5 +3,5 @@
 namespace PcAsCloud.CORE.Entities;
 public class AppUser : IdentityUser
 {
-
+    public ICollection<ChannelUser> ChannelUsers { get; set; }
 }

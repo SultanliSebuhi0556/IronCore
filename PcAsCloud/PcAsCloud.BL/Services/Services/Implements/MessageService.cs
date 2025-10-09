@@ -1,25 +1,57 @@
 ﻿using AutoMapper;
+using FluentValidation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using PcAsCloud.BL.DTOs.Message;
 using PcAsCloud.BL.Exceptions.CommonExceptions;
+using PcAsCloud.BL.ExternalServices.Storage;
 using PcAsCloud.BL.Services.Services.Instances;
 using PcAsCloud.CORE.Entities;
 using PcAsCloud.CORE.RepositoryInstances;
 
 namespace PcAsCloud.BL.Services.Services.Implements;
-public class MessageService(IMessageRepository _messageRepository, IMapper _mapper) : IMessageService
+public class MessageService(
+    IMessageRepository _messageRepository,
+    IChannelServices _channelServices,
+    ISaveFileService _fileService,
+    IHttpContextAccessor _httpContextAccessor,
+    UserManager<AppUser> _userManager,
+    IValidator<MessageCreateDTO> _validator,
+    IMapper _mapper) : IMessageService
 {
-
-    public Task<string> CreateMessageAsync(AppUser currentUser, string channelId)
+    public async Task<string?> CreateMessageAsync(MessageCreateDTO dto)
     {
-        throw new NotImplementedException();
+        await _validator.ValidateAndThrowAsync(dto);
+
+        var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);
+        if (user == null) throw new NotFoundException<AppUser>();
+
+        var message = new Message
+        {
+            Content = dto.Content,
+            SendedBy = user,
+            ChannelId = dto.ChannelId,
+        };
+
+        if (dto.File != null)
+        {
+            var newFileName = $"{dto.ChannelId}_{Guid.NewGuid()}";
+            var resultPath = await _fileService.SaveFileAsync(Path.Combine(dto.RootPath, "FileStorage"), dto.File, newFileName);
+            message.FileUrl = resultPath;
+        }
+
+        await _messageRepository.CreateAsync(message);
+        await _messageRepository.SaveChangesAsync();
+
+        return message.FileUrl;
     }
 
-    public Task ArchiveUnarchiveMessageAsync(string id)
+    public async Task ArchiveUnarchiveMessageAsync(string id)
     {
         var target = await _messageRepository.GetByIdAsync(id);
         if (target == null) throw new NotFoundException<Message>();
         target.IsArchived = target.IsArchived ? false : true;
-        await _channelRepository.SaveChangesAsync();
+        await _messageRepository.SaveChangesAsync();
     }
 
     public async Task DeleteMessageAsync(string id)
@@ -30,9 +62,10 @@ public class MessageService(IMessageRepository _messageRepository, IMapper _mapp
         await _messageRepository.SaveChangesAsync();
     }
 
-    public Task<IEnumerable<MessageGetDTO>> GetAllMessagesByChannelIdAsync(string channelId)
+    public async Task<IEnumerable<MessageGetDTO>> GetAllMessagesByChannelIdAsync(string channelId)
     {
-        throw new NotImplementedException();
+        var channel = await _channelServices.GetChannelByIdAsync(channelId);
+        return _mapper.Map<IEnumerable<MessageGetDTO>>(channel.Messages);
     }
 
     public async Task<MessageGetDTO> GetMessageByIdAsync(string id)

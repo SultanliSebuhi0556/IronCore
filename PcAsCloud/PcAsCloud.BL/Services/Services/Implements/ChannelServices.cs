@@ -1,37 +1,32 @@
-﻿using AutoMapper;
+﻿using FluentValidation;
 using PcAsCloud.BL.DTOs.Channel;
-using PcAsCloud.BL.Exceptions.ChannelExceptions;
 using PcAsCloud.BL.Exceptions.CommonExceptions;
 using PcAsCloud.BL.Services.Services.Instances;
 using PcAsCloud.CORE.Entities;
 using PcAsCloud.CORE.RepositoryInstances;
 
 namespace PcAsCloud.BL.Services.Services.Implements;
-public class ChannelServices(IChannelRepository _channelRepository, IMapper _mapper) : IChannelServices
+public class ChannelServices(IChannelRepository _channelRepository, IValidator<ChannelCreateDTO> _validator) : IChannelServices
 {
 
-    public async Task<string> CreateChannelAsync(AppUser currentUser, bool isDirect, string? channelName, AppUser? targertUser)
+    public async Task<string> CreateChannelAsync(ChannelCreateDTO dto)
     {
         var channel = new Channel()
         {
-            IsDirect = isDirect
+            IsDirect = dto.IsDirect
         };
 
-        if (isDirect)
-        {
-            if (targertUser == null || string.IsNullOrWhiteSpace(channelName))
-                throw new DirectChannelMustHaveTargetUserException();
+        await _validator.ValidateAndThrowAsync(dto);
 
-            channel.Name = $"{currentUser.UserName}-{targertUser.UserName}";
-            channel.Users = new List<AppUser> { currentUser, targertUser };
+        if (dto.IsDirect)
+        {
+            channel.Name = $"{dto.CurrentUser.UserName}-{dto.TargertUser!.UserName}";
+            channel.Users = new List<AppUser> { dto.CurrentUser, dto.TargertUser };
         }
         else
         {
-            if (string.IsNullOrWhiteSpace(channelName))
-                throw new IndirectChannelMustHaveChannelNameException();
-
-            channel.Name = channelName!;
-            channel.Users = new List<AppUser> { currentUser };
+            channel.Name = dto.ChannelName!;
+            channel.Users = new List<AppUser> { dto.CurrentUser };
         }
 
         await _channelRepository.CreateAsync(channel);
@@ -56,16 +51,15 @@ public class ChannelServices(IChannelRepository _channelRepository, IMapper _map
         await _channelRepository.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<ChannelGetDTO>> GetAllChannelsAsync()
+    public async Task<IEnumerable<Channel>> GetAllChannelsAsync()
     {
-        var channels = await _channelRepository.GetAllAsync(nameof(AppUser));
-        return _mapper.Map<IEnumerable<ChannelGetDTO>>(channels);
+        return await _channelRepository.GetAllAsync(nameof(AppUser));
     }
 
-    public async Task<ChannelGetDTO> GetChannelByIdAsync(string id)
+    public async Task<Channel> GetChannelByIdAsync(string id)
     {
-        var channel = await _channelRepository.GetByIdAsync(id);
+        var channel = await _channelRepository.GetByIdAsync(id, includes: nameof(Message));
         if (channel == null) throw new NotFoundException<Channel>();
-        return _mapper.Map<ChannelGetDTO>(channel);
+        return channel;
     }
 }
