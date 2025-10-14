@@ -27,8 +27,7 @@ public class ChannelConfiguration : IEntityTypeConfiguration<Channel>
                 .HasDefaultValue(false);
 
         builder.Property(c => c.CreatedDate)
-                .IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+                .IsRequired();
 
         builder.Property(c => c.ArchiveDate)
                 .IsRequired(false);

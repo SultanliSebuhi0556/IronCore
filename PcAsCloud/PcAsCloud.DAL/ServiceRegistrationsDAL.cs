@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using PcAsCloud.CORE.Entities;
 using PcAsCloud.CORE.RepositoryInstances;
 using PcAsCloud.DAL.Context;
 using PcAsCloud.DAL.RepositoryImplements;
@@ -13,7 +11,6 @@ public static class ServiceRegistrationsDAL
     public static IServiceCollection AddDalServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddRepositories();
-        services.AddIdentity();
         services.AddDbContext(configuration);
         return services;
     }
@@ -29,36 +26,6 @@ public static class ServiceRegistrationsDAL
         services.AddDbContext<AppDbContext>(opt =>
         {
             opt.UseNpgsql(configuration.GetConnectionString("PostgreSQL"));
-        });
-        return services;
-    }
-
-    private static IServiceCollection AddIdentity(this IServiceCollection services)
-    {
-        services.AddIdentityCore<AppUser>(options => options.SignIn.RequireConfirmedAccount = false)
-            .AddRoles<IdentityRole>()
-            .AddEntityFrameworkStores<AppDbContext>();
-
-        services.Configure<IdentityOptions>(options =>
-        {
-            options.Password.RequireDigit = true;
-            options.Password.RequireLowercase = true;
-            options.Password.RequireUppercase = true;
-            options.Password.RequireNonAlphanumeric = true;
-            options.Password.RequiredLength = 12;
-            options.Password.RequiredUniqueChars = 3;
-
-            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
-            options.Lockout.MaxFailedAccessAttempts = 5;
-            options.Lockout.AllowedForNewUsers = true;
-
-            options.User.AllowedUserNameCharacters =
-                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-
-            options.User.RequireUniqueEmail = true;
-
-            options.SignIn.RequireConfirmedEmail = true;
-            options.SignIn.RequireConfirmedPhoneNumber = false;
         });
         return services;
     }

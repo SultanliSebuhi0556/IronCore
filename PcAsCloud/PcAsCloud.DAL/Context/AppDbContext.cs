@@ -4,7 +4,7 @@ using PcAsCloud.CORE.Entities;
 
 namespace PcAsCloud.DAL.Context;
 
-public class AppDbContext : IdentityUserContext<AppUser>
+public class AppDbContext : IdentityDbContext<AppUser>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -13,6 +13,7 @@ public class AppDbContext : IdentityUserContext<AppUser>
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
+        base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 }

@@ -33,8 +33,7 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
             .HasDefaultValue(false);
 
         builder.Property(m => m.CreatedDate)
-            .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .IsRequired();
 
         builder.Property(m => m.ArchiveDate)
             .IsRequired(false);

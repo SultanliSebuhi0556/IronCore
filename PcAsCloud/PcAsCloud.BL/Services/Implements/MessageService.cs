@@ -4,40 +4,38 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using PcAsCloud.BL.DTOs.Message;
 using PcAsCloud.BL.Exceptions.CommonExceptions;
-using PcAsCloud.BL.ExternalServices.Storage;
-using PcAsCloud.BL.Services.Services.Instances;
+using PcAsCloud.BL.Services.Instances;
 using PcAsCloud.CORE.Entities;
 using PcAsCloud.CORE.RepositoryInstances;
 
-namespace PcAsCloud.BL.Services.Services.Implements;
+namespace PcAsCloud.BL.Services.Implements;
 public class MessageService(
     IMessageRepository _messageRepository,
     IChannelServices _channelServices,
-    ISaveFileService _fileService,
-    IHttpContextAccessor _httpContextAccessor,
     UserManager<AppUser> _userManager,
+    IHttpContextAccessor _httpContextAccessor,
     IValidator<MessageCreateDTO> _validator,
     IMapper _mapper) : IMessageService
 {
-    public async Task<string?> CreateMessageAsync(MessageCreateDTO dto)
+    public async Task<string?> CreateMessageAsync(MessageCreateDTO dto, string rootPath)
     {
         await _validator.ValidateAndThrowAsync(dto);
 
-        var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);
-        if (user == null) throw new NotFoundException<AppUser>();
+        var currentUser = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext!.User);
+        if (currentUser == null) throw new NotFoundException<AppUser>();
 
         var message = new Message
         {
             Content = dto.Content,
-            SendedBy = user,
+            SendedBy = currentUser,
             ChannelId = Guid.Parse(dto.ChannelId),
         };
 
         if (dto.File != null)
         {
             var newFileName = $"{dto.ChannelId}_{Guid.NewGuid()}";
-            var resultPath = await _fileService.SaveFileAsync(Path.Combine(dto.RootPath, "FileStorage"), dto.File, newFileName);
-            message.FileUrl = resultPath;
+            //var resultPath = await _fileService.SaveFileAsync(Path.Combine(rootPath, "FileStorage"), dto.File, newFileName);
+            //message.FileUrl = resultPath;
         }
 
         await _messageRepository.CreateAsync(message);

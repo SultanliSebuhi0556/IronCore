@@ -7,18 +7,10 @@ public class ChannelCreateDTOValidator : AbstractValidator<ChannelCreateDTO>
 {
     public ChannelCreateDTOValidator()
     {
-        RuleFor(x => x.CurrentUser)
-            .NotNull().WithMessage("Current user is required.");
-
         When(x => x.IsDirect, () =>
         {
-            RuleFor(x => x.TargertUser)
-                .NotNull().WithMessage("A direct channel must have a target user!");
-
-            RuleFor(x => x.TargertUser)
-                .Must((dto, targetUser) => targetUser?.Id != dto.CurrentUser?.Id)
-                .WithMessage("Cannot create a direct channel with yourself!")
-                .When(x => x.TargertUser != null && x.CurrentUser != null);
+            RuleFor(x => x.TargetUserId)
+                .NotEmpty().WithMessage("A direct channel must have a target user ID!");
         });
 
         When(x => !x.IsDirect, () =>

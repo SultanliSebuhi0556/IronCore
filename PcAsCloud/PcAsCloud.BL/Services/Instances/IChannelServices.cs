@@ -1,7 +1,7 @@
 ﻿using PcAsCloud.BL.DTOs.Channel;
 using PcAsCloud.CORE.Entities;
 
-namespace PcAsCloud.BL.Services.Services.Instances;
+namespace PcAsCloud.BL.Services.Instances;
 public interface IChannelServices
 {
     Task<string> CreateChannelAsync(ChannelCreateDTO dto);

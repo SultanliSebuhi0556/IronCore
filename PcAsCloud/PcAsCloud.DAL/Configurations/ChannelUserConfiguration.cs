@@ -20,8 +20,7 @@ public class ChannelUserConfiguration : IEntityTypeConfiguration<ChannelUser>
             .HasMaxLength(450);
 
         builder.Property(cu => cu.JoinedDate)
-            .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .IsRequired();
 
         builder.HasIndex(cu => cu.UserId);
         builder.HasIndex(cu => cu.JoinedDate);

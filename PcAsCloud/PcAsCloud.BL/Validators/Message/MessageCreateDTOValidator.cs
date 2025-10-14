@@ -9,7 +9,7 @@ public class MessageCreateDTOValidator : AbstractValidator<MessageCreateDTO>
     public MessageCreateDTOValidator()
     {
         RuleFor(x => x.ChannelId)
-            .NotEmpty().WithMessage("Channel ID is required.");
+             .NotEmpty().WithMessage("Channel ID is required.");
 
         RuleFor(x => x.Content)
             .MaximumLength(5000).WithMessage("Message content cannot exceed 5000 characters.")
@@ -31,7 +31,6 @@ public class MessageCreateDTOValidator : AbstractValidator<MessageCreateDTO>
     private bool HaveValidFileName(IFormFile? file)
     {
         if (file == null) return true;
-
         var fileName = Path.GetFileName(file.FileName);
         return !fileName.Contains("..") && !fileName.Contains("/") && !fileName.Contains("\\");
     }

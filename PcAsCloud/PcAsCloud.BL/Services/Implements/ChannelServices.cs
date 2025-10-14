@@ -1,12 +1,18 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using PcAsCloud.BL.DTOs.Channel;
 using PcAsCloud.BL.Exceptions.CommonExceptions;
-using PcAsCloud.BL.Services.Services.Instances;
+using PcAsCloud.BL.Services.Instances;
 using PcAsCloud.CORE.Entities;
 using PcAsCloud.CORE.RepositoryInstances;
 
-namespace PcAsCloud.BL.Services.Services.Implements;
-public class ChannelServices(IChannelRepository _channelRepository, IValidator<ChannelCreateDTO> _validator) : IChannelServices
+namespace PcAsCloud.BL.Services.Implements;
+public class ChannelServices(
+    IChannelRepository _channelRepository,
+    UserManager<AppUser> _userManager,
+    IHttpContextAccessor _httpContextAccessor,
+    IValidator<ChannelCreateDTO> _validator) : IChannelServices
 {
 
     public async Task<string> CreateChannelAsync(ChannelCreateDTO dto)
@@ -18,13 +24,18 @@ public class ChannelServices(IChannelRepository _channelRepository, IValidator<C
 
         await _validator.ValidateAndThrowAsync(dto);
 
+        var currentUser = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext!.User);
+        if (currentUser == null) throw new NotFoundException<AppUser>();
+
         if (dto.IsDirect)
         {
-            channel.Name = $"{dto.CurrentUser.UserName}-{dto.TargertUser!.UserName}";
+            var targetUser = await _userManager.FindByIdAsync(dto.TargetUserId!);
+
+            channel.Name = $"{currentUser.UserName}-{targetUser!.UserName}";
             channel.ChannelUsers = new List<ChannelUser>
             {
-                new ChannelUser { User = dto.CurrentUser, Channel = channel},
-                new ChannelUser { User = dto.TargertUser, Channel = channel}
+                new ChannelUser { User = currentUser, Channel = channel},
+                new ChannelUser { User = targetUser, Channel = channel}
             };
         }
         else
@@ -32,7 +43,7 @@ public class ChannelServices(IChannelRepository _channelRepository, IValidator<C
             channel.Name = dto.ChannelName!;
             channel.ChannelUsers = new List<ChannelUser>
             {
-                new ChannelUser { User = dto.CurrentUser, Channel = channel},
+                new ChannelUser { User = currentUser, Channel = channel},
             };
         }
 
