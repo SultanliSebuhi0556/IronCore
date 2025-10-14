@@ -4,37 +4,41 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using PcAsCloud.BL.DTOs.Message;
 using PcAsCloud.BL.Exceptions.CommonExceptions;
-using PcAsCloud.BL.Services.Instances;
+using PcAsCloud.BL.Services.Services.Instances;
+using PcAsCloud.BL.Services.Services.Instances;
 using PcAsCloud.CORE.Entities;
 using PcAsCloud.CORE.RepositoryInstances;
 
-namespace PcAsCloud.BL.Services.Implements;
+namespace PcAsCloud.BL.Services.Services.Implements;
 public class MessageService(
     IMessageRepository _messageRepository,
-    IChannelServices _channelServices,
-    UserManager<AppUser> _userManager,
+    IStorageService _storageService,
     IHttpContextAccessor _httpContextAccessor,
+    IHttpContextAccessor _httpContextAccessor,
+    UserManager<AppUser> _userManager,
     IValidator<MessageCreateDTO> _validator,
     IMapper _mapper) : IMessageService
-{
-    public async Task<string?> CreateMessageAsync(MessageCreateDTO dto, string rootPath)
+    public async Task<string?> CreateMessageAsync(MessageCreateDTO dto, CancellationToken cancellationToken)
+    public async Task<string?> CreateMessageAsync(MessageCreateDTO dto)
     {
+        //TODO: add ct to methods in this class 
+
         await _validator.ValidateAndThrowAsync(dto);
 
-        var currentUser = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext!.User);
-        if (currentUser == null) throw new NotFoundException<AppUser>();
+        var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);
+        if (user == null) throw new NotFoundException<AppUser>();
 
         var message = new Message
         {
             Content = dto.Content,
-            SendedBy = currentUser,
+            SendedBy = user,
             ChannelId = Guid.Parse(dto.ChannelId),
         };
 
         if (dto.File != null)
         {
             var newFileName = $"{dto.ChannelId}_{Guid.NewGuid()}";
-            //var resultPath = await _fileService.SaveFileAsync(Path.Combine(rootPath, "FileStorage"), dto.File, newFileName);
+            //var resultPath = await _storageService.SaveFileAsync(dto.File, newFileName, cancellationToken);
             //message.FileUrl = resultPath;
         }
 

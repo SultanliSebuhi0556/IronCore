@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using PcAsCloud.BL.DTOs.Message;
 
 namespace PcAsCloud.BL.Validators.Message;
-
 public class MessageCreateDTOValidator : AbstractValidator<MessageCreateDTO>
 {
     public MessageCreateDTOValidator()
