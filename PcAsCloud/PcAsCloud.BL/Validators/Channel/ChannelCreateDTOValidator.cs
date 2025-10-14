@@ -2,7 +2,6 @@
 using PcAsCloud.BL.DTOs.Channel;
 
 namespace PcAsCloud.BL.Validators.Channel;
-
 public class ChannelCreateDTOValidator : AbstractValidator<ChannelCreateDTO>
 {
     public ChannelCreateDTOValidator()

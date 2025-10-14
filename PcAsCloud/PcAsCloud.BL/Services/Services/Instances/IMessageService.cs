@@ -4,7 +4,7 @@ namespace PcAsCloud.BL.Services.Services.Instances;
 
 public interface IMessageService
 {
-    Task<string?> CreateMessageAsync(MessageCreateDTO dto);
+    Task<string?> CreateMessageAsync(MessageCreateDTO dto, CancellationToken cancellationToken);
     Task<MessageGetDTO> GetMessageByIdAsync(string id);
     Task<IEnumerable<MessageGetDTO>> GetAllMessagesByChannelIdAsync(string channelId);
     Task DeleteMessageAsync(string id);

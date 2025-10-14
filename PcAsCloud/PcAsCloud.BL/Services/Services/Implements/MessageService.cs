@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using PcAsCloud.BL.DTOs.Message;
 using PcAsCloud.BL.Exceptions.CommonExceptions;
-using PcAsCloud.BL.ExternalServices.Storage;
 using PcAsCloud.BL.Services.Services.Instances;
 using PcAsCloud.CORE.Entities;
 using PcAsCloud.CORE.RepositoryInstances;
@@ -13,14 +12,16 @@ namespace PcAsCloud.BL.Services.Services.Implements;
 public class MessageService(
     IMessageRepository _messageRepository,
     IChannelServices _channelServices,
-    ISaveFileService _fileService,
+    IStorageService _storageService,
     IHttpContextAccessor _httpContextAccessor,
     UserManager<AppUser> _userManager,
     IValidator<MessageCreateDTO> _validator,
     IMapper _mapper) : IMessageService
 {
-    public async Task<string?> CreateMessageAsync(MessageCreateDTO dto)
+    public async Task<string?> CreateMessageAsync(MessageCreateDTO dto, CancellationToken cancellationToken)
     {
+        //TODO: add ct to methods in this class 
+
         await _validator.ValidateAndThrowAsync(dto);
 
         var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);
@@ -36,8 +37,8 @@ public class MessageService(
         if (dto.File != null)
         {
             var newFileName = $"{dto.ChannelId}_{Guid.NewGuid()}";
-            var resultPath = await _fileService.SaveFileAsync(Path.Combine(dto.RootPath, "FileStorage"), dto.File, newFileName);
-            message.FileUrl = resultPath;
+            //var resultPath = await _storageService.SaveFileAsync(dto.File, newFileName, cancellationToken);
+            //message.FileUrl = resultPath;
         }
 
         await _messageRepository.CreateAsync(message);

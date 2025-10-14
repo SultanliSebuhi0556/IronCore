@@ -5,6 +5,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCustomServices(builder.Configuration);
+builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

@@ -1,11 +1,10 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
-using PcAsCloud.BL.ExternalServices.Storage;
+using PcAsCloud.BL.Helpers.Implements;
+using PcAsCloud.BL.Helpers.Instances;
 using PcAsCloud.BL.Services.Services.Implements;
 using PcAsCloud.BL.Services.Services.Instances;
-using PcAsCloud.BL.Validators.Channel;
-using PcAsCloud.BL.Validators.Message;
 
 namespace PcAsCloud.BL;
 public static class ServiceRegistrationsBL
@@ -21,7 +20,8 @@ public static class ServiceRegistrationsBL
     {
         services.AddScoped<IChannelServices, ChannelServices>();
         services.AddScoped<IMessageService, MessageService>();
-        services.AddScoped<ISaveFileService, SaveFileService>();
+        services.AddScoped<IFileHelper, FileHelper>();
+        services.AddScoped<IStorageService, StorageService>();
         return services;
     }
     private static IServiceCollection AddMapperProfiles(this IServiceCollection services)
@@ -33,7 +33,5 @@ public static class ServiceRegistrationsBL
     {
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssemblyContaining(typeof(ServiceRegistrationsBL));
-        services.AddValidatorsFromAssemblyContaining<MessageCreateDTOValidator>();
-        services.AddValidatorsFromAssemblyContaining<ChannelCreateDTOValidator>();
     }
 }
