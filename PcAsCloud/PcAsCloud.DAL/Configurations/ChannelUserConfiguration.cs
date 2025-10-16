@@ -10,19 +10,19 @@ public class ChannelUserConfiguration : IEntityTypeConfiguration<ChannelUser>
     {
         builder.ToTable("ChannelUsers");
 
-        builder.HasKey(cu => new { cu.ChannelId, cu.UserId });
+        builder.HasKey(cu => new { cu.ChannelId, cu.AppUserId });
 
         builder.Property(cu => cu.ChannelId)
             .IsRequired();
 
-        builder.Property(cu => cu.UserId)
+        builder.Property(cu => cu.AppUserId)
             .IsRequired()
             .HasMaxLength(450);
 
         builder.Property(cu => cu.JoinedDate)
             .IsRequired();
 
-        builder.HasIndex(cu => cu.UserId);
+        builder.HasIndex(cu => cu.AppUserId);
         builder.HasIndex(cu => cu.JoinedDate);
 
         builder.HasOne(cu => cu.Channel)
@@ -30,9 +30,9 @@ public class ChannelUserConfiguration : IEntityTypeConfiguration<ChannelUser>
             .HasForeignKey(cu => cu.ChannelId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(cu => cu.User)
+        builder.HasOne(cu => cu.AppUser)
             .WithMany(u => u.ChannelUsers)
-            .HasForeignKey(cu => cu.UserId)
+            .HasForeignKey(cu => cu.AppUserId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

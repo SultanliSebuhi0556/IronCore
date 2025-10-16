@@ -9,8 +9,6 @@ using PcAsCloud.BL.Services.Implements;
 using PcAsCloud.BL.Services.Instances;
 using PcAsCloud.BL.Validators.Channel;
 using PcAsCloud.BL.Validators.Message;
-using PcAsCloud.BL.Helpers.Implements;
-using PcAsCloud.BL.Helpers.Instances;
 using PcAsCloud.BL.Services.Services.Implements;
 using PcAsCloud.BL.Services.Services.Instances;
 

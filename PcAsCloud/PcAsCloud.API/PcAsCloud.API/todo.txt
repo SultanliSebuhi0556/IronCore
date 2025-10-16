@@ -1,3 +1,4 @@
-1. Services has Services folder init 
+1. test storage servie
 2. Custom exceptions -> look todos
-3. MessageService and ChannelService should not request dto from controller
+3. add valiadtions to all 
+4. defaoult profile image

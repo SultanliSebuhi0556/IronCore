@@ -9,6 +9,6 @@ public class ChannelProfiles : Profile
     public ChannelProfiles()
     {
         CreateMap<Channel, ChannelGetDTO>()
-            .ForMember(dest => dest.UserIds, opt => opt.MapFrom(src => src.ChannelUsers.Select(u => u.User.Id)));
+            .ForMember(dest => dest.UserIds, opt => opt.MapFrom(src => src.ChannelUsers.Select(u => u.AppUser.Id)));
     }
 }

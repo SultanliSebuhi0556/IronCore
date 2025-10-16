@@ -1,18 +1,25 @@
-﻿using PcAsCloud.BL.Helpers.Instances;
+﻿using PcAsCloud.BL.ExternalServices.Instances;
 
-namespace PcAsCloud.BL.Helpers.Implements;
+namespace PcAsCloud.BL.ExternalServices.Implements;
 public class FileHelper : IFileHelper
 {
     private static readonly string basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Test");
-    public async Task SaveFileAsync(string folderName, string fileName, Stream file, CancellationToken cancellationToken = default)
+
+    public async Task<string> SaveFileAsync(string folderName, string fileName, Stream file, CancellationToken cancellationToken = default)
     {
         string folderPath = Path.Combine(basePath, folderName);
         Directory.CreateDirectory(folderPath);
+
+        if (File.Exists(Path.Combine(folderPath, fileName)))
+        {
+            fileName = Path.GetFileNameWithoutExtension(fileName) + "-Copy_" + Guid.NewGuid() + Path.GetExtension(fileName);
+        }
 
         string filePath = Path.Combine(folderPath, fileName);
 
         await using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
         await file.CopyToAsync(fileStream, cancellationToken);
+        return fileName;
     }
 
     public async Task<MemoryStream> GetFileAsync(string folderName, string fileName, CancellationToken cancellationToken = default)

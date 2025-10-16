@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PcAsCloud.BL.DTOs.Channel;
 using PcAsCloud.BL.Services.Instances;
 
 namespace PcAsCloud.API.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class ChannelController(IChannelServices _channelServices) : ControllerBase
@@ -41,6 +43,20 @@ public class ChannelController(IChannelServices _channelServices) : ControllerBa
     public async Task<IActionResult> ArchiveUnarchiveChannel(string id)
     {
         await _channelServices.ArchiveUnarchiveChannelAsync(id);
+        return Ok();
+    }
+
+    [HttpPost("[action]")]
+    public async Task<IActionResult> JoinChannel(string id)
+    {
+        await _channelServices.JoinChannelAsync(id);
+        return Ok();
+    }
+
+    [HttpDelete("[action]")]
+    public async Task<IActionResult> LeaveChannel(string id)
+    {
+        await _channelServices.LeaveChannelAsync(id);
         return Ok();
     }
 }

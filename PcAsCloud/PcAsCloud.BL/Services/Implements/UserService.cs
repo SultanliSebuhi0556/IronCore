@@ -47,7 +47,7 @@ public class UserService(
         }
 
         var result = await _signInManager.PasswordSignInAsync(user!, dto.Password, true, false);
-        if (!result.Succeeded) throw new Exception("IncorrectPasswordException"); //TODO: IncorrectPasswordException
+        if (!result.Succeeded) throw new Exception("IncorrectPasswordException"); //TODO: ex
         var token = _tokenGenerator.CreateJWTToken(user, 24);
         return new LoginResponseDTO
         {
@@ -56,9 +56,9 @@ public class UserService(
         };
     }
 
-    public Task LogoutAsync()
+    public async Task LogoutAsync()
     {
-        throw new NotImplementedException();
+        await _signInManager.SignOutAsync();
     }
 
     public Task SetProfileImageAsync(string userId, IFormFile image)

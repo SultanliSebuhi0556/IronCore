@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PcAsCloud.BL.DTOs.Message;
 using PcAsCloud.BL.Services.Instances;
 
 namespace PcAsCloud.API.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class MessageController(IMessageService _messageService, IWebHostEnvironment _webHostEnvironment) : ControllerBase
@@ -11,7 +13,8 @@ public class MessageController(IMessageService _messageService, IWebHostEnvironm
     [HttpPost("[action]")]
     public async Task<IActionResult> CreateMessage([FromQuery] MessageCreateDTO dto)
     {
-        var result = await _messageService.CreateMessageAsync(dto, _webHostEnvironment.WebRootPath);
+        var cancellationToken = new CancellationToken();
+        var result = await _messageService.CreateMessageAsync(dto, cancellationToken);
         return Ok(result);
     }
 
