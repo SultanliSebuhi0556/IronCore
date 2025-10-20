@@ -1,10 +1,14 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
+using PcAsCloud.BL.DTOs.User;
+using PcAsCloud.BL.Services.Instances;
 
 namespace PcAsCloud.API.Features.Commands.UserCommands.UserLoginOrRegister;
-public class UserLoginOrRegisterHandler : IRequestHandler<UserLoginOrRegisterRequest, UserLoginOrRegisterResponse>
+public class UserLoginOrRegisterHandler(IUserService _userService, IMapper _mapper) : IRequestHandler<UserLoginOrRegisterRequest, UserLoginOrRegisterResponse>
 {
-    public Task<UserLoginOrRegisterResponse> Handle(UserLoginOrRegisterRequest request, CancellationToken cancellationToken)
+    public async Task<UserLoginOrRegisterResponse> Handle(UserLoginOrRegisterRequest request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = await _userService.LoginOrRegisterAndLoginAsync(_mapper.Map<LoginDTO>(request));
+        return new() { Id = result.Id, Token = result.Token };
     }
 }

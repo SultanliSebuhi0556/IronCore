@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using PcAsCloud.BL.Services.Instances;
 
 namespace PcAsCloud.API.Features.Commands.ChannelCommands.ChannelArchive;
-public class ChannelArchiveHandler : IRequestHandler<ChannelArchiveRequest, ChannelArchiveResponse>
+public class ChannelArchiveHandler(IChannelServices _channelServices) : IRequestHandler<ChannelArchiveRequest, ChannelArchiveResponse>
 {
-    public Task<ChannelArchiveResponse> Handle(ChannelArchiveRequest request, CancellationToken cancellationToken)
+    public async Task<ChannelArchiveResponse> Handle(ChannelArchiveRequest request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = await _channelServices.ArchiveUnarchiveChannelAsync(request.Id);
+        return new() { IsArchived = result };
     }
 }

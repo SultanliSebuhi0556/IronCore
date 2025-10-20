@@ -1,10 +1,18 @@
 ﻿using MediatR;
+using PcAsCloud.BL.Services.Instances;
 
 namespace PcAsCloud.API.Features.Queries.ChannelQueries.ChannelGetById;
-public class ChannelGetByIdHandler : IRequestHandler<ChannelGetByIdRequest, ChannelGetByIdResponse>
+public class ChannelGetByIdHandler(IChannelServices _channelServices) : IRequestHandler<ChannelGetByIdRequest, ChannelGetByIdResponse>
 {
-    public Task<ChannelGetByIdResponse> Handle(ChannelGetByIdRequest request, CancellationToken cancellationToken)
+    public async Task<ChannelGetByIdResponse> Handle(ChannelGetByIdRequest request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = await _channelServices.GetChannelByIdAsync(request.Id);
+        return new()
+        {
+            IsDirect = result.IsDirect,
+            Name = result.Name,
+            Id = result.Id,
+            UserIds = result.UserIds
+        };
     }
 }

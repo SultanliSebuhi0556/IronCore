@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using PcAsCloud.BL.Services.Services.Instances;
 
 namespace PcAsCloud.API.Features.Queries.StorageQueries.StorageDownloadFile;
-public class StorageDownloadFileHandler : IRequestHandler<StorageDownloadFileRequest, StorageDownloadFileResponse>
+public class StorageDownloadFileHandler(IStorageService _storageService) : IRequestHandler<StorageDownloadFileRequest, StorageDownloadFileResponse>
 {
-    public Task<StorageDownloadFileResponse> Handle(StorageDownloadFileRequest request, CancellationToken cancellationToken)
+    public async Task<StorageDownloadFileResponse> Handle(StorageDownloadFileRequest request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var stream = await _storageService.GetFileAsync(request.FileName, cancellationToken);
+        return new() { Stream = stream };
     }
 }

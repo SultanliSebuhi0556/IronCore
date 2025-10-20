@@ -1,48 +1,46 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PcAsCloud.BL.DTOs.Message;
-using PcAsCloud.BL.Services.Instances;
+using PcAsCloud.API.Features.Commands.MessageCommands.MessageArchive;
+using PcAsCloud.API.Features.Commands.MessageCommands.MessageCreate;
+using PcAsCloud.API.Features.Commands.MessageCommands.MessageDelete;
+using PcAsCloud.API.Features.Queries.MessageQueries.MessageGetById;
+using PcAsCloud.API.Features.Queries.MessageQueries.MessageGetChannelMessages;
 
 namespace PcAsCloud.API.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class MessageController(IMessageService _messageService, IWebHostEnvironment _webHostEnvironment) : ControllerBase
+public class MessageController(IMediator _mediator) : ControllerBase
 {
     [HttpPost("[action]")]
-    public async Task<IActionResult> CreateMessage([FromQuery] MessageCreateDTO dto)
+    public async Task<IActionResult> CreateMessage([FromQuery] MessageCreateRequest request)
     {
-        var cancellationToken = new CancellationToken();
-        var result = await _messageService.CreateMessageAsync(dto, cancellationToken);
-        return Ok(result);
+        return Ok(await _mediator.Send(request));
     }
 
     [HttpGet("[action]")]
-    public async Task<IActionResult> GetMessageById(string id)
+    public async Task<IActionResult> GetMessageById([FromQuery] MessageGetByIdRequest request)
     {
-        var result = await _messageService.GetMessageByIdAsync(id);
-        return Ok(result);
+        return Ok(await _mediator.Send(request));
     }
 
     [HttpGet("[action]")]
-    public async Task<IActionResult> GetAllMessagesByChannelId(string id)
+    public async Task<IActionResult> GetAllMessagesByChannelId([FromQuery] MessageGetChannelMessagesRequest request)
     {
-        var result = await _messageService.GetAllMessagesByChannelIdAsync(id);
-        return Ok(result);
+        return Ok(await _mediator.Send(request));
     }
 
     [HttpDelete("[action]")]
-    public async Task<IActionResult> DeleteMessage(string id)
+    public async Task<IActionResult> DeleteMessage([FromQuery] MessageDeleteRequest request)
     {
-        await _messageService.DeleteMessageAsync(id);
-        return Ok();
+        return Ok(await _mediator.Send(request));
     }
 
     [HttpPut("[action]")]
-    public async Task<IActionResult> ArchiveUnarchiveMessage(string id)
+    public async Task<IActionResult> ArchiveUnarchiveMessage([FromQuery] MessageArchiveRequest request)
     {
-        await _messageService.ArchiveUnarchiveMessageAsync(id);
-        return Ok();
+        return Ok(await _mediator.Send(request));
     }
 }

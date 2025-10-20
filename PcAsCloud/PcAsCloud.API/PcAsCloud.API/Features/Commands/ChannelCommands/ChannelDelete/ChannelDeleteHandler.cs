@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using PcAsCloud.BL.Services.Instances;
 
 namespace PcAsCloud.API.Features.Commands.ChannelCommands.ChannelDelete;
-public class ChannelDeleteHandler : IRequestHandler<ChannelDeleteRequest, ChannelDeleteResponse>
+public class ChannelDeleteHandler(IChannelServices _channelServices) : IRequestHandler<ChannelDeleteRequest, ChannelDeleteResponse>
 {
-    public Task<ChannelDeleteResponse> Handle(ChannelDeleteRequest request, CancellationToken cancellationToken)
+    public async Task<ChannelDeleteResponse> Handle(ChannelDeleteRequest request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        await _channelServices.DeleteChannelAsync(request.Id);
+        return new();
     }
 }

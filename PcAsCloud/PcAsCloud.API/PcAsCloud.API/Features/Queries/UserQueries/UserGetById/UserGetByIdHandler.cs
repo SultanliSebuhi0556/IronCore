@@ -1,10 +1,17 @@
 ﻿using MediatR;
+using PcAsCloud.BL.Services.Instances;
 
 namespace PcAsCloud.API.Features.Queries.UserQueries.UserGetById;
-public class UserGetByIdHandler : IRequestHandler<UserGetByIdRequest, UserGetByIdResponse>
+public class UserGetByIdHandler(IUserService _userService) : IRequestHandler<UserGetByIdRequest, UserGetByIdResponse>
 {
-    public Task<UserGetByIdResponse> Handle(UserGetByIdRequest request, CancellationToken cancellationToken)
+    public async Task<UserGetByIdResponse> Handle(UserGetByIdRequest request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var user = await _userService.GetUserByIdAsync(request.Id);
+        return new()
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            ProfileImageUrl = user.ProfileImageUrl
+        };
     }
 }

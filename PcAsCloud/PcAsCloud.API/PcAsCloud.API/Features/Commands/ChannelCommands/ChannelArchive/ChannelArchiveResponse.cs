@@ -1,2 +1,5 @@
 ﻿namespace PcAsCloud.API.Features.Commands.ChannelCommands.ChannelArchive;
-public class ChannelArchiveResponse { }
+public class ChannelArchiveResponse
+{
+    public bool IsArchived { get; set; }
+}

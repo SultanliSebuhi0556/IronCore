@@ -1,10 +1,14 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
+using PcAsCloud.BL.DTOs.Message;
+using PcAsCloud.BL.Services.Instances;
 
 namespace PcAsCloud.API.Features.Commands.MessageCommands.MessageCreate;
-public class MessageCreateHandler : IRequestHandler<MessageCreateRequest, MessageCreateResponse>
+public class MessageCreateHandler(IMessageService _messageService, IMapper _mapper) : IRequestHandler<MessageCreateRequest, MessageCreateResponse>
 {
-    public Task<MessageCreateResponse> Handle(MessageCreateRequest request, CancellationToken cancellationToken)
+    public async Task<MessageCreateResponse> Handle(MessageCreateRequest request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = await _messageService.CreateMessageAsync(_mapper.Map<MessageCreateDTO>(request), cancellationToken);
+        return new() { Id = result.Id, FilePath = result.FilePath };
     }
 }

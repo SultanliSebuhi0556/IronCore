@@ -1,10 +1,13 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
+using PcAsCloud.BL.Services.Instances;
 
 namespace PcAsCloud.API.Features.Queries.UserQueries.UserGetAll;
-public class UserGetAllHandler : IRequestHandler<UserGetAllRequest, IEnumerable<UserGetAllResponse>>
+public class UserGetAllHandler(IUserService _userService, IMapper _mapper) : IRequestHandler<UserGetAllRequest, IEnumerable<UserGetAllResponse>>
 {
-    public Task<IEnumerable<UserGetAllResponse>> Handle(UserGetAllRequest request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<UserGetAllResponse>> Handle(UserGetAllRequest request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = await _userService.GetAllUsersAsync();
+        return _mapper.Map<IEnumerable<UserGetAllResponse>>(result);
     }
 }

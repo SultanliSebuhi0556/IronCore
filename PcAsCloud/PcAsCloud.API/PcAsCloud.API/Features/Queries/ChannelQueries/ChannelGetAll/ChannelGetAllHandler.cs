@@ -1,10 +1,13 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
+using PcAsCloud.BL.Services.Instances;
 
 namespace PcAsCloud.API.Features.Queries.ChannelQueries.ChannelGetAll;
-public class ChannelGetAllHandler : IRequestHandler<ChannelGetAllRequest, IEnumerable<ChannelGetAllResponse>>
+public class ChannelGetAllHandler(IChannelServices _channelServices, IMapper _mapper) : IRequestHandler<ChannelGetAllRequest, IEnumerable<ChannelGetAllResponse>>
 {
-    public Task<IEnumerable<ChannelGetAllResponse>> Handle(ChannelGetAllRequest request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<ChannelGetAllResponse>> Handle(ChannelGetAllRequest request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var result = await _channelServices.GetAllChannelsAsync();
+        return _mapper.Map<IEnumerable<ChannelGetAllResponse>>(result);
     }
 }

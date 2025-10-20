@@ -1,62 +1,61 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PcAsCloud.BL.DTOs.Channel;
-using PcAsCloud.BL.Services.Instances;
+using PcAsCloud.API.Features.Commands.ChannelCommands.ChannelArchive;
+using PcAsCloud.API.Features.Commands.ChannelCommands.ChannelCreate;
+using PcAsCloud.API.Features.Commands.ChannelCommands.ChannelDelete;
+using PcAsCloud.API.Features.Commands.ChannelCommands.ChannelJoin;
+using PcAsCloud.API.Features.Commands.ChannelCommands.ChannelLeave;
+using PcAsCloud.API.Features.Queries.ChannelQueries.ChannelGetAll;
+using PcAsCloud.API.Features.Queries.ChannelQueries.ChannelGetById;
 
 namespace PcAsCloud.API.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class ChannelController(IChannelServices _channelServices) : ControllerBase
+public class ChannelController(IMediator _mediator) : ControllerBase
 {
     [HttpPost("[action]")]
-    public async Task<IActionResult> CreateChannel([FromQuery] ChannelCreateDTO dto)
+    public async Task<IActionResult> CreateChannel([FromQuery] ChannelCreateRequest request)
     {
-        var result = await _channelServices.CreateChannelAsync(dto);
-        return Ok(result);
+        return Ok(await _mediator.Send(request));
     }
 
     [HttpGet("[action]")]
-    public async Task<IActionResult> GetChannelById(string id)
+    public async Task<IActionResult> GetChannelById([FromQuery] ChannelGetByIdRequest request)
     {
-        var result = await _channelServices.GetChannelByIdAsync(id);
-        return Ok(result);
+        return Ok(await _mediator.Send(request));
     }
 
     [HttpGet("[action]")]
-    public async Task<IActionResult> GetAllChannels()
+    public async Task<IActionResult> GetAllChannels([FromQuery] ChannelGetAllRequest request)
     {
-        var result = await _channelServices.GetAllChannelsAsync();
-        return Ok(result);
+        return Ok(await _mediator.Send(request));
     }
 
     [HttpDelete("[action]")]
-    public async Task<IActionResult> DeleteChannel(string id)
+    public async Task<IActionResult> DeleteChannel([FromQuery] ChannelDeleteRequest request)
     {
-        await _channelServices.DeleteChannelAsync(id);
-        return Ok();
+        return Ok(await _mediator.Send(request));
     }
 
 
     [HttpPut("[action]")]
-    public async Task<IActionResult> ArchiveUnarchiveChannel(string id)
+    public async Task<IActionResult> ArchiveUnarchiveChannel([FromQuery] ChannelArchiveRequest request)
     {
-        await _channelServices.ArchiveUnarchiveChannelAsync(id);
-        return Ok();
+        return Ok(await _mediator.Send(request));
     }
 
     [HttpPost("[action]")]
-    public async Task<IActionResult> JoinChannel(string id)
+    public async Task<IActionResult> JoinChannel([FromQuery] ChannelJoinRequest request)
     {
-        await _channelServices.JoinChannelAsync(id);
-        return Ok();
+        return Ok(await _mediator.Send(request));
     }
 
     [HttpDelete("[action]")]
-    public async Task<IActionResult> LeaveChannel(string id)
+    public async Task<IActionResult> LeaveChannel([FromQuery] ChannelLeaveRequest request)
     {
-        await _channelServices.LeaveChannelAsync(id);
-        return Ok();
+        return Ok(await _mediator.Send(request));
     }
 }

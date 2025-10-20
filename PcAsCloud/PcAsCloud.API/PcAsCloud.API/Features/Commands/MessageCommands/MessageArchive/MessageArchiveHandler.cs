@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using PcAsCloud.BL.Services.Instances;
 
 namespace PcAsCloud.API.Features.Commands.MessageCommands.MessageArchive;
-public class MessageArchiveHandler : IRequestHandler<MessageArchiveRequest, MessageArchiveResponse>
+public class MessageArchiveHandler(IMessageService _messageService) : IRequestHandler<MessageArchiveRequest, MessageArchiveResponse>
 {
-    public Task<MessageArchiveResponse> Handle(MessageArchiveRequest request, CancellationToken cancellationToken)
+    public async Task<MessageArchiveResponse> Handle(MessageArchiveRequest request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        bool isArchived = await _messageService.ArchiveUnarchiveMessageAsync(request.Id);
+        return new MessageArchiveResponse() { IsArchived = isArchived };
     }
 }

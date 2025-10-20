@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using PcAsCloud.BL.Services.Instances;
 
 namespace PcAsCloud.API.Features.Commands.UserCommands.UserLogout;
-public class UserLogoutHandler : IRequestHandler<UserLogoutRequest, UserLogoutResponse>
+public class UserLogoutHandler(IUserService _userService) : IRequestHandler<UserLogoutRequest, UserLogoutResponse>
 {
-    public Task<UserLogoutResponse> Handle(UserLogoutRequest request, CancellationToken cancellationToken)
+    public async Task<UserLogoutResponse> Handle(UserLogoutRequest request, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        await _userService.LogoutAsync();
+        return new();
     }
 }

@@ -1,47 +1,50 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PcAsCloud.BL.DTOs.User;
-using PcAsCloud.BL.Services.Instances;
+using PcAsCloud.API.Features.Commands.UserCommands.UserLoginOrRegister;
+using PcAsCloud.API.Features.Commands.UserCommands.UserLogout;
+using PcAsCloud.API.Features.Commands.UserCommands.UserSetProfileImage;
+using PcAsCloud.API.Features.Queries.UserQueries.UserGetAll;
+using PcAsCloud.API.Features.Queries.UserQueries.UserGetById;
 
 namespace PcAsCloud.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UserController(IUserService _userService) : ControllerBase
+public class UserController(IMediator _mediator) : ControllerBase
 {
     [HttpPost("[action]")]
-    public async Task<IActionResult> LoginOrRegisterAndLogin([FromQuery] LoginDTO dto)
+    public async Task<IActionResult> LoginOrRegisterAndLogin([FromQuery] UserLoginOrRegisterRequest request)
     {
-        return Ok(await _userService.LoginOrRegisterAndLoginAsync(dto));
+        return Ok(await _mediator.Send(request));
     }
 
     [Authorize]
     [HttpPost("[action]")]
-    public async Task<IActionResult> LoginOut()
+    public async Task<IActionResult> LoginOut([FromQuery] UserLogoutRequest request)
     {
-        await _userService.LogoutAsync();
-        return Ok();
+        return Ok(await _mediator.Send(request));
+
     }
 
     [Authorize]
     [HttpPut("[action]")]
-    public async Task<IActionResult> SetProfileImage(string id, IFormFile image)
+    public async Task<IActionResult> SetProfileImage([FromQuery] UserSetProfileImageRequest request)
     {
-        await _userService.SetProfileImageAsync(id, image);
-        return Ok();
+        return Ok(await _mediator.Send(request));
     }
 
     [Authorize]
     [HttpGet("[action]")]
-    public async Task<IActionResult> GetUserById([FromQuery] string id)
+    public async Task<IActionResult> GetUserById([FromQuery] UserGetByIdRequest request)
     {
-        return Ok(await _userService.GetUserByIdAsync(id));
+        return Ok(await _mediator.Send(request));
     }
 
     [Authorize]
     [HttpGet("[action]")]
-    public async Task<IActionResult> GetAllUsers()
+    public async Task<IActionResult> GetAllUsers([FromQuery] UserGetAllRequest request)
     {
-        return Ok(await _userService.GetAllUsersAsync());
+        return Ok(await _mediator.Send(request));
     }
 }
