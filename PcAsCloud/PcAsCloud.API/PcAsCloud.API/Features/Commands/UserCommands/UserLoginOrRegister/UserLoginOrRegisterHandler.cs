@@ -8,7 +8,7 @@ public class UserLoginOrRegisterHandler(IUserService _userService, IMapper _mapp
 {
     public async Task<UserLoginOrRegisterResponse> Handle(UserLoginOrRegisterRequest request, CancellationToken cancellationToken)
     {
-        var result = await _userService.LoginOrRegisterAndLoginAsync(_mapper.Map<LoginDTO>(request));
+        var result = await _userService.LoginOrRegisterAsync(_mapper.Map<LoginDTO>(request));
         return new() { Id = result.Id, Token = result.Token };
     }
 }

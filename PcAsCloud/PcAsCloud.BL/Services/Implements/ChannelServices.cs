@@ -114,7 +114,7 @@ public class ChannelServices(
 
     public async Task DeleteChannelAsync(string id)
     {
-        var target = await _context.Channels.FirstOrDefaultAsync(x => x.Id.ToString() == id);
+        var target = await _context.Channels.Include(x => x.ChannelUsers).FirstOrDefaultAsync(x => x.Id.ToString() == id);
         if (target == null) throw new NotFoundException<Channel>();
 
         var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);

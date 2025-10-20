@@ -38,7 +38,7 @@ public class UserService(
         return _mapper.Map<UserGetDTO>(result);
     }
 
-    public async Task<LoginResponseDTO> LoginOrRegisterAndLoginAsync(LoginDTO dto)
+    public async Task<LoginResponseDTO> LoginOrRegisterAsync(LoginDTO dto)
     {
         var user = await _userManager.FindByNameAsync(dto.UserName);
         if (user == null)

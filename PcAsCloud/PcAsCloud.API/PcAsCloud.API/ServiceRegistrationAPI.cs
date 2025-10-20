@@ -13,7 +13,8 @@ public static class ServiceRegistrationAPI
     {
         services.AddDalServices(configuration);
         services.AddBlServices(configuration);
-
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ServiceRegistrationAPI).Assembly));
+        services.AddMapperProfiles();
         services.AddIdentity<AppUser, IdentityRole>(options =>
         {
             options.Password.RequireDigit = true;
@@ -27,7 +28,11 @@ public static class ServiceRegistrationAPI
 
         return services;
     }
-
+    private static IServiceCollection AddMapperProfiles(this IServiceCollection services)
+    {
+        services.AddAutoMapper(typeof(ServiceRegistrationAPI).Assembly);
+        return services;
+    }
     public static IServiceCollection ConfigureSwaggerAuthentication(this IServiceCollection services)
     {
 

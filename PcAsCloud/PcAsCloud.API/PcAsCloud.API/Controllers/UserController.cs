@@ -14,7 +14,7 @@ namespace PcAsCloud.API.Controllers;
 public class UserController(IMediator _mediator) : ControllerBase
 {
     [HttpPost("[action]")]
-    public async Task<IActionResult> LoginOrRegisterAndLogin([FromQuery] UserLoginOrRegisterRequest request)
+    public async Task<IActionResult> LoginOrRegister([FromQuery] UserLoginOrRegisterRequest request)
     {
         return Ok(await _mediator.Send(request));
     }

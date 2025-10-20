@@ -7,8 +7,6 @@ using PcAsCloud.BL.ExternalServices.Instances;
 using PcAsCloud.BL.Options;
 using PcAsCloud.BL.Services.Implements;
 using PcAsCloud.BL.Services.Instances;
-using PcAsCloud.BL.Validators.Channel;
-using PcAsCloud.BL.Validators.Message;
 using PcAsCloud.BL.Services.Services.Implements;
 using PcAsCloud.BL.Services.Services.Instances;
 
@@ -21,7 +19,6 @@ public static class ServiceRegistrationsBL
         services.AddServices();
         services.AddCustomOptions(configuration);
         services.AddFluentValidation();
-        services.AddMapperProfiles();
         return services;
     }
     private static IServiceCollection AddCustomOptions(this IServiceCollection services, IConfiguration configuration)
@@ -37,11 +34,6 @@ public static class ServiceRegistrationsBL
         services.AddScoped<ITokenGenerator, TokenGenerator>();
         services.AddScoped<IFileHelper, FileHelper>();
         services.AddScoped<IStorageService, StorageService>();
-        return services;
-    }
-    private static IServiceCollection AddMapperProfiles(this IServiceCollection services)
-    {
-        services.AddAutoMapper(typeof(ServiceRegistrationsBL).Assembly);
         return services;
     }
     private static void AddFluentValidation(this IServiceCollection services)
