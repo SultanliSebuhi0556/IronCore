@@ -1,13 +1,14 @@
-## TODO
-- [ ] Implement CQRS
-- [ ] Change the name of "LoginOrRegisterAndLogin" to "LoginOrRegister"
-- [ ] delete todo
-- [ ] Default Profile image and SetProfileImage
+    ## TODO
+- [*] Implement CQRS
+- [ ] Cnage the name of "LoginOrRegisterAndLogin" to "LoginOrRegister"
+- [*] delete todo
+- [ ] Defaoul Profile image and SetProfileImage
 - [ ] Exceptions
 - [ ] Validations
 - [ ] Get File list
-- [ ] Add has read to messages (when get read gonna be true)
-- [ ] Add Get All users by channel id
+- [ ] Add has readed to messages (when get read gonna be true)
+- [*] Add Get All users by channel id
 - [ ] Add MarkAsRead 
 - [ ] Add Pagination
-- [ ] Remove unnecessary DTOs
+- [*] Remove unneccecery DTOs
+- [ ] Add cancelationTokens to all methods in services

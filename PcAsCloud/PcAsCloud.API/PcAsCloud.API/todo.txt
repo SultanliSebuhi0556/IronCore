@@ -1,4 +1,0 @@
-1. test storage servie
-2. Custom exceptions -> look todos
-3. add valiadtions to all 
-4. defaoult profile image
