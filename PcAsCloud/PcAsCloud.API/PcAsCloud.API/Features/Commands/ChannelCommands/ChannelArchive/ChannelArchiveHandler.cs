@@ -6,7 +6,7 @@ public class ChannelArchiveHandler(IChannelServices _channelServices) : IRequest
 {
     public async Task<ChannelArchiveResponse> Handle(ChannelArchiveRequest request, CancellationToken cancellationToken)
     {
-        var result = await _channelServices.ArchiveUnarchiveChannelAsync(request.Id);
+        var result = await _channelServices.ArchiveUnarchiveChannelAsync(request.Id, cancellationToken);
         return new() { IsArchived = result };
     }
 }

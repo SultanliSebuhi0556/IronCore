@@ -8,7 +8,7 @@ public class ChannelCreateHandler(IChannelServices _channelServices, IMapper _ma
 {
     public async Task<ChannelCreateResponse> Handle(ChannelCreateRequest request, CancellationToken cancellationToken)
     {
-        var result = await _channelServices.CreateChannelAsync(_mapper.Map<ChannelCreateDTO>(request));
+        var result = await _channelServices.CreateChannelAsync(_mapper.Map<ChannelCreateDTO>(request), cancellationToken);
         return new() { Id = result };
     }
 }

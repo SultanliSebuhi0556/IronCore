@@ -6,7 +6,7 @@ public class MessageArchiveHandler(IMessageService _messageService) : IRequestHa
 {
     public async Task<MessageArchiveResponse> Handle(MessageArchiveRequest request, CancellationToken cancellationToken)
     {
-        bool isArchived = await _messageService.ArchiveUnarchiveMessageAsync(request.Id);
+        bool isArchived = await _messageService.ArchiveUnarchiveMessageAsync(request.Id, cancellationToken);
         return new MessageArchiveResponse() { IsArchived = isArchived };
     }
 }

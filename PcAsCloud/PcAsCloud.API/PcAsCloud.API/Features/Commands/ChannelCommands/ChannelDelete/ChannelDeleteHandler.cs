@@ -6,7 +6,7 @@ public class ChannelDeleteHandler(IChannelServices _channelServices) : IRequestH
 {
     public async Task<ChannelDeleteResponse> Handle(ChannelDeleteRequest request, CancellationToken cancellationToken)
     {
-        await _channelServices.DeleteChannelAsync(request.Id);
+        await _channelServices.DeleteChannelAsync(request.Id, cancellationToken);
         return new();
     }
 }

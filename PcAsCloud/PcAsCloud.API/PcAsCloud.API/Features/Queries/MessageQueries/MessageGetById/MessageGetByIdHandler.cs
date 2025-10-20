@@ -6,7 +6,7 @@ public class MessageGetByIdHandler(IMessageService _messageService) : IRequestHa
 {
     public async Task<MessageGetByIdResponse> Handle(MessageGetByIdRequest request, CancellationToken cancellationToken)
     {
-        var result = await _messageService.GetMessageByIdAsync(request.Id);
+        var result = await _messageService.GetMessageByIdAsync(request.Id, cancellationToken);
         return new()
         {
             Id = result.Id,

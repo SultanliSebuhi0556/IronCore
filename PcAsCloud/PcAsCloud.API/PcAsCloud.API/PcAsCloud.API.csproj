@@ -19,4 +19,8 @@
     <ProjectReference Include="..\..\PcAsCloud.BL\PcAsCloud.BL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\data\profile_images\user_profile_images\" />
+  </ItemGroup>
+
 </Project>

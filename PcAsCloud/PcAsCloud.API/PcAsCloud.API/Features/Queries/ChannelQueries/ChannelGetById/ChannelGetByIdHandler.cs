@@ -6,7 +6,7 @@ public class ChannelGetByIdHandler(IChannelServices _channelServices) : IRequest
 {
     public async Task<ChannelGetByIdResponse> Handle(ChannelGetByIdRequest request, CancellationToken cancellationToken)
     {
-        var result = await _channelServices.GetChannelByIdAsync(request.Id);
+        var result = await _channelServices.GetChannelByIdAsync(request.Id, cancellationToken);
         return new()
         {
             IsDirect = result.IsDirect,

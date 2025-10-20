@@ -6,7 +6,7 @@ public class ChannelJoinHandler(IChannelServices _channelServices) : IRequestHan
 {
     public async Task<ChannelJoinResponse> Handle(ChannelJoinRequest request, CancellationToken cancellationToken)
     {
-        await _channelServices.JoinChannelAsync(request.Id);
+        await _channelServices.JoinChannelAsync(request.Id, cancellationToken);
         return new();
     }
 }

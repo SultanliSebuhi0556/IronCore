@@ -6,7 +6,7 @@ public class ChannelLeaveHandler(IChannelServices _channelServices) : IRequestHa
 {
     public async Task<ChannelLeaveResponse> Handle(ChannelLeaveRequest request, CancellationToken cancellationToken)
     {
-        await _channelServices.LeaveChannelAsync(request.Id);
+        await _channelServices.LeaveChannelAsync(request.Id, cancellationToken);
         return new();
     }
 }

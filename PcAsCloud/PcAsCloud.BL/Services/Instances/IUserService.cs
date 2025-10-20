@@ -5,9 +5,9 @@ namespace PcAsCloud.BL.Services.Instances;
 public interface IUserService
 {
     Task<UserGetDTO> GetUserByIdAsync(string id);
-    Task<IEnumerable<UserGetDTO>> GetAllUsersAsync();
-    Task<IEnumerable<UserGetDTO>> GetAllUsersInChannelAsync(string channelId);
+    Task<IEnumerable<UserGetDTO>> GetAllUsersAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<UserGetDTO>> GetAllUsersInChannelAsync(string channelId, CancellationToken cancellationToken);
     Task<LoginResponseDTO> LoginOrRegisterAsync(LoginDTO dto);
-    Task SetProfileImageAsync(ChangeProfileImageDTO dto);
+    Task<string> SetProfileImageAsync(ChangeProfileImageDTO dto, CancellationToken cancellationToken);
     Task LogoutAsync();
 }

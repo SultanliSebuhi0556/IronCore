@@ -8,7 +8,7 @@ public class UserSetProfileImageHandler(IUserService _userService, IMapper _mapp
 {
     public async Task<UserSetProfileImageResponse> Handle(UserSetProfileImageRequest request, CancellationToken cancellationToken)
     {
-        await _userService.SetProfileImageAsync(_mapper.Map<ChangeProfileImageDTO>(request));
-        return new();
+        var imageUrl = await _userService.SetProfileImageAsync(_mapper.Map<ChangeProfileImageDTO>(request), cancellationToken);
+        return new() { ImageUrl = imageUrl };
     }
 }

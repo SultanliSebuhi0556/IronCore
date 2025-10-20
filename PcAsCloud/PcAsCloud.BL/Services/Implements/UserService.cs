@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -8,25 +9,28 @@ using PcAsCloud.BL.Exceptions.CommonExceptions;
 using PcAsCloud.BL.ExternalServices.Instances;
 using PcAsCloud.BL.Services.Instances;
 using PcAsCloud.CORE.Entities;
+using PcAsCloud.DAL.Context;
 
 namespace PcAsCloud.BL.Services.Implements;
 
 public class UserService(
     UserManager<AppUser> _userManager,
+    AppDbContext _context,
     IHttpContextAccessor _httpContextAccessor,
+    IWebHostEnvironment _webHostEnvironment,
     ITokenGenerator _tokenGenerator,
     SignInManager<AppUser> _signInManager,
     IMapper _mapper) : IUserService
 {
-    public async Task<IEnumerable<UserGetDTO>> GetAllUsersAsync()
+    public async Task<IEnumerable<UserGetDTO>> GetAllUsersAsync(CancellationToken cancellationToken)
     {
-        var result = _mapper.Map<IEnumerable<UserGetDTO>>(await _userManager.Users.ToListAsync());
+        var result = _mapper.Map<IEnumerable<UserGetDTO>>(await _userManager.Users.ToListAsync(cancellationToken));
         return result;
     }
 
-    public async Task<IEnumerable<UserGetDTO>> GetAllUsersInChannelAsync(string channelId)
+    public async Task<IEnumerable<UserGetDTO>> GetAllUsersInChannelAsync(string channelId, CancellationToken cancellationToken)
     {
-        var users = await _userManager.Users.Include(x => x.ChannelUsers).Where(x => x.ChannelUsers.Any(x => x.ChannelId.ToString() == channelId)).ToListAsync();
+        var users = await _userManager.Users.Include(x => x.ChannelUsers).Where(x => x.ChannelUsers.Any(x => x.ChannelId.ToString() == channelId)).ToListAsync(cancellationToken);
         var result = _mapper.Map<IEnumerable<UserGetDTO>>(users);
         return result;
     }
@@ -44,7 +48,9 @@ public class UserService(
         if (user == null)
         {
             var newUser = _mapper.Map<AppUser>(dto);
-            newUser.ProfileImageUrl = ""; //TODO:default user profile image!
+            var path = Path.Combine("data", "profile_images", "default_profile_image.jpg");
+            if (!File.Exists(Path.Combine(_webHostEnvironment.WebRootPath, path))) throw new Exception("default profile image coulnt be found!"); //TODO: ex
+            newUser.ProfileImageUrl = path;
 
             await _userManager.CreateAsync(newUser, dto.Password);
             if (newUser == null) throw new Exception(); //TODO: ex
@@ -68,9 +74,23 @@ public class UserService(
         await _signInManager.SignOutAsync();
     }
 
-    public Task SetProfileImageAsync(ChangeProfileImageDTO dto)
+    public async Task<string> SetProfileImageAsync(ChangeProfileImageDTO dto, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == dto.Id, cancellationToken);
+        if (user == null) throw new NotFoundException<AppUser>();
+
+        var basePath = Path.Combine("data", "profile_images", "user_profile_images");
+        var rootPath = Path.Combine(_webHostEnvironment.WebRootPath, basePath);
+        if (!Path.Exists(rootPath)) Directory.CreateDirectory(rootPath);
+        var uniqueName = $"{user.UserName!}_{Guid.NewGuid()}" + Path.GetExtension(dto.Image.FileName);
+        var fullPath = Path.Combine(rootPath, uniqueName);
+
+        using (Stream stream = new FileStream(fullPath, FileMode.Create))
+            await dto.Image.CopyToAsync(stream);
+
+        user.ProfileImageUrl = Path.Combine(basePath, uniqueName);
+        await _context.SaveChangesAsync(cancellationToken);
+        return user.ProfileImageUrl;
     }
 
     private async Task<AppUser> _getCurrentUserAsync()

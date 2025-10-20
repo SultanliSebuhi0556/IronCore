@@ -6,7 +6,7 @@ public class MessageDeleteHandler(IMessageService _messageService) : IRequestHan
 {
     public async Task<MessageDeleteResponse> Handle(MessageDeleteRequest request, CancellationToken cancellationToken)
     {
-        await _messageService.DeleteMessageAsync(request.Id);
+        await _messageService.DeleteMessageAsync(request.Id, cancellationToken);
         return new();
     }
 }

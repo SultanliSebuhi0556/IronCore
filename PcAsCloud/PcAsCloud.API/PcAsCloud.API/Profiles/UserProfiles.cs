@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using PcAsCloud.API.Features.Commands.UserCommands.UserLoginOrRegister;
+using PcAsCloud.API.Features.Commands.UserCommands.UserSetProfileImage;
 using PcAsCloud.API.Features.Queries.UserQueries.UserGetAll;
 using PcAsCloud.BL.DTOs.User;
 using PcAsCloud.CORE.Entities;
@@ -9,6 +10,7 @@ public class UserProfiles : Profile
 {
     public UserProfiles()
     {
+        CreateMap<UserSetProfileImageRequest, ChangeProfileImageDTO>();
         CreateMap<UserLoginOrRegisterRequest, LoginDTO>();
         CreateMap<UserGetDTO, UserGetAllResponse>();
         CreateMap<LoginDTO, AppUser>();

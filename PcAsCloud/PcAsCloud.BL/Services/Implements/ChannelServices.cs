@@ -19,14 +19,14 @@ public class ChannelServices(
     IValidator<ChannelCreateDTO> _validator) : IChannelServices
 {
 
-    public async Task JoinChannelAsync(string id)
+    public async Task JoinChannelAsync(string id, CancellationToken cancellationToken)
     {
         var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);
         if (user == null) throw new NotFoundException<AppUser>();
 
         var channel = await _context.Channels
             .Include(c => c.ChannelUsers)
-            .FirstOrDefaultAsync(c => c.Id.ToString() == id);
+            .FirstOrDefaultAsync(c => c.Id.ToString() == id, cancellationToken);
         if (channel == null) throw new NotFoundException<Channel>();
         if (channel.IsDirect) throw new Exception("cant leave direct channels"); //TODO: ex
 
@@ -37,17 +37,17 @@ public class ChannelServices(
             AppUser = user,
             Channel = channel
         });
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task LeaveChannelAsync(string id)
+    public async Task LeaveChannelAsync(string id, CancellationToken cancellationToken)
     {
         var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);
         if (user == null) throw new NotFoundException<AppUser>();
 
         var channel = await _context.Channels
             .Include(c => c.ChannelUsers)
-            .FirstOrDefaultAsync(c => c.Id.ToString() == id);
+            .FirstOrDefaultAsync(c => c.Id.ToString() == id, cancellationToken);
         if (channel == null) throw new NotFoundException<Channel>();
         if (channel.IsDirect) throw new Exception("cant leave direct channels"); //TODO: ex
 
@@ -55,10 +55,10 @@ public class ChannelServices(
         if (target == null) throw new Exception("cant leave this channel becouse u are not init"); //TODO: ex
 
         channel.ChannelUsers.Remove(target);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<string> CreateChannelAsync(ChannelCreateDTO dto)
+    public async Task<string> CreateChannelAsync(ChannelCreateDTO dto, CancellationToken cancellationToken)
     {
         var channel = new Channel()
         {
@@ -90,59 +90,59 @@ public class ChannelServices(
             };
         }
 
-        await _context.AddAsync(channel);
-        await _context.SaveChangesAsync();
+        await _context.AddAsync(channel, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
 
         return channel.Id.ToString();
     }
 
-    public async Task<bool> ArchiveUnarchiveChannelAsync(string id)
+    public async Task<bool> ArchiveUnarchiveChannelAsync(string id, CancellationToken cancellationToken)
     {
-        var target = await _context.Channels.FirstOrDefaultAsync(x => x.Id.ToString() == id);
+        var target = await _context.Channels.Include(x => x.ChannelUsers).FirstOrDefaultAsync(x => x.Id.ToString() == id, cancellationToken);
         if (target == null) throw new NotFoundException<Channel>();
 
         var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);
         if (user == null) throw new NotFoundException<AppUser>();
 
         var rolesOfUser = await _userManager.GetRolesAsync(user);
-        if (!target.ChannelUsers.Any(x => x.AppUser == user) || !rolesOfUser.Contains(nameof(UserRoles.Admin))) throw new Exception("cant delete this message "); //TODO: ex
+        if (!target.ChannelUsers.Any(x => x.AppUser == user) && !rolesOfUser.Contains(nameof(UserRoles.Admin))) throw new Exception("cant delete this message "); //TODO: ex
 
         target.IsArchived = target.IsArchived ? false : true;
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
         return target.IsArchived;
     }
 
-    public async Task DeleteChannelAsync(string id)
+    public async Task DeleteChannelAsync(string id, CancellationToken cancellationToken)
     {
-        var target = await _context.Channels.Include(x => x.ChannelUsers).FirstOrDefaultAsync(x => x.Id.ToString() == id);
+        var target = await _context.Channels.Include(x => x.ChannelUsers).FirstOrDefaultAsync(x => x.Id.ToString() == id, cancellationToken);
         if (target == null) throw new NotFoundException<Channel>();
 
         var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);
         if (user == null) throw new NotFoundException<AppUser>();
 
         var rolesOfUser = await _userManager.GetRolesAsync(user);
-        if (!target.ChannelUsers.Any(x => x.AppUser == user) || !rolesOfUser.Contains(nameof(UserRoles.Admin))) throw new Exception("cant delete this message "); //TODO: ex
+        if (!target.ChannelUsers.Any(x => x.AppUser == user) && !rolesOfUser.Contains(nameof(UserRoles.Admin))) throw new Exception("cant delete this message "); //TODO: ex
 
         await Task.Run(() => _context.Remove(target));
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<ChannelGetDTO>> GetAllChannelsAsync()
+    public async Task<IEnumerable<ChannelGetDTO>> GetAllChannelsAsync(CancellationToken cancellationToken)
     {
         var channels = await _context.Channels
             .Include(x => x.ChannelUsers)
             .ThenInclude(x => x.AppUser)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return _mapper.Map<IEnumerable<ChannelGetDTO>>(channels);
     }
 
-    public async Task<ChannelGetDTO> GetChannelByIdAsync(string id)
+    public async Task<ChannelGetDTO> GetChannelByIdAsync(string id, CancellationToken cancellationToken)
     {
         var channel = await _context.Channels
             .Include(x => x.ChannelUsers)
             .ThenInclude(x => x.AppUser)
-            .FirstOrDefaultAsync(x => x.Id.ToString() == id);
+            .FirstOrDefaultAsync(x => x.Id.ToString() == id, cancellationToken);
 
         if (channel == null) throw new NotFoundException<Channel>();
         return _mapper.Map<ChannelGetDTO>(channel);

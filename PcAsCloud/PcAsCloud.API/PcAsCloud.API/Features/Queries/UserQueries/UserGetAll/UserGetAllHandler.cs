@@ -7,7 +7,7 @@ public class UserGetAllHandler(IUserService _userService, IMapper _mapper) : IRe
 {
     public async Task<IEnumerable<UserGetAllResponse>> Handle(UserGetAllRequest request, CancellationToken cancellationToken)
     {
-        var result = await _userService.GetAllUsersAsync();
+        var result = await _userService.GetAllUsersAsync(cancellationToken);
         return _mapper.Map<IEnumerable<UserGetAllResponse>>(result);
     }
 }

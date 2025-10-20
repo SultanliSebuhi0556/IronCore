@@ -23,9 +23,7 @@ public class MessageService(
 {
     public async Task<MessageCreateResponseDTO?> CreateMessageAsync(MessageCreateDTO dto, CancellationToken cancellationToken)
     {
-        //TODO: add ct to methods in this class 
-
-        await _validator.ValidateAndThrowAsync(dto);
+        await _validator.ValidateAndThrowAsync(dto, cancellationToken);
 
         var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);
         if (user == null) throw new NotFoundException<AppUser>();
@@ -37,10 +35,10 @@ public class MessageService(
             ChannelId = Guid.Parse(dto.ChannelId),
         };
 
-        var channel = await _context.Channels.FirstOrDefaultAsync(x => x.Id == message.ChannelId);
+        var channel = await _context.Channels.Include(x => x.ChannelUsers).FirstOrDefaultAsync(x => x.Id == message.ChannelId, cancellationToken);
         if (channel == null) throw new NotFoundException<Channel>();
 
-        if (channel.ChannelUsers == null || !channel.ChannelUsers.Any(x => x.AppUserId == message.SendedById))
+        if (!channel.ChannelUsers.Any(x => x.AppUser == message.SendedBy))
             throw new Exception("cant send message in this chat"); //TODO: ex
 
         if (dto.File != null)
@@ -50,8 +48,8 @@ public class MessageService(
             //message.FileUrl = resultPath;
         }
 
-        await _context.AddAsync(message);
-        await _context.SaveChangesAsync();
+        await _context.AddAsync(message, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
 
         return new MessageCreateResponseDTO
         {
@@ -60,48 +58,48 @@ public class MessageService(
         };
     }
 
-    public async Task<bool> ArchiveUnarchiveMessageAsync(string id)
+    public async Task<bool> ArchiveUnarchiveMessageAsync(string id, CancellationToken cancellationToken)
     {
-        var target = await _context.Messages.FirstOrDefaultAsync(x => x.Id.ToString() == id);
+        var target = await _context.Messages.FirstOrDefaultAsync(x => x.Id.ToString() == id, cancellationToken);
         if (target == null) throw new NotFoundException<Message>();
 
         var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);
         if (user == null) throw new NotFoundException<AppUser>();
 
         var rolesOfUser = await _userManager.GetRolesAsync(user);
-        if (target.SendedById != user.Id || !rolesOfUser.Contains(nameof(UserRoles.Admin))) throw new Exception("cant delete this message "); //TODO: ex
+        if (target.SendedById != user.Id && !rolesOfUser.Contains(nameof(UserRoles.Admin))) throw new Exception("cant delete this message "); //TODO: ex
 
         target.IsArchived = target.IsArchived ? false : true;
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
         return target.IsArchived;
     }
 
-    public async Task DeleteMessageAsync(string id)
+    public async Task DeleteMessageAsync(string id, CancellationToken cancellationToken)
     {
-        var target = await _context.Messages.FirstOrDefaultAsync(x => x.Id.ToString() == id);
+        var target = await _context.Messages.FirstOrDefaultAsync(x => x.Id.ToString() == id, cancellationToken);
         if (target == null) throw new NotFoundException<Message>();
 
         var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);
         if (user == null) throw new NotFoundException<AppUser>();
 
         var rolesOfUser = await _userManager.GetRolesAsync(user);
-        if (target.SendedById != user.Id || !rolesOfUser.Contains(nameof(UserRoles.Admin))) throw new Exception("cant delete this message "); //TODO: ex
+        if (target.SendedById != user.Id && !rolesOfUser.Contains(nameof(UserRoles.Admin))) throw new Exception("cant delete this message "); //TODO: ex
 
         await Task.Run(() => _context.Remove(target));
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<MessageGetDTO>> GetAllMessagesByChannelIdAsync(string channelId)
+    public async Task<IEnumerable<MessageGetDTO>> GetAllMessagesByChannelIdAsync(string channelId, CancellationToken cancellationToken)
     {
-        var channel = await _context.Channels.Include(x => x.Messages).ThenInclude(x => x.SendedBy).FirstOrDefaultAsync(x => x.Id.ToString() == channelId);
+        var channel = await _context.Channels.Include(x => x.Messages).ThenInclude(x => x.SendedBy).FirstOrDefaultAsync(x => x.Id.ToString() == channelId, cancellationToken);
         if (channel == null) throw new NotFoundException<Channel>();
 
         return _mapper.Map<IEnumerable<MessageGetDTO>>(channel.Messages);
     }
 
-    public async Task<MessageGetDTO> GetMessageByIdAsync(string id)
+    public async Task<MessageGetDTO> GetMessageByIdAsync(string id, CancellationToken cancellationToken)
     {
-        var message = await _context.Messages.FirstOrDefaultAsync(x => x.Id.ToString() == id);
+        var message = await _context.Messages.FirstOrDefaultAsync(x => x.Id.ToString() == id, cancellationToken);
         if (message == null) throw new NotFoundException<Message>();
         return _mapper.Map<MessageGetDTO>(message);
     }

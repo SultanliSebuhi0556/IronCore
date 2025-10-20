@@ -7,7 +7,7 @@ public class MessageGetChannelMessagesHandler(IMessageService _messageService, I
 {
     public async Task<IEnumerable<MessageGetChannelMessagesResponse>> Handle(MessageGetChannelMessagesRequest request, CancellationToken cancellationToken)
     {
-        var result = await _messageService.GetAllMessagesByChannelIdAsync(request.Id);
+        var result = await _messageService.GetAllMessagesByChannelIdAsync(request.Id, cancellationToken);
         return _mapper.Map<IEnumerable<MessageGetChannelMessagesResponse>>(result);
     }
 }

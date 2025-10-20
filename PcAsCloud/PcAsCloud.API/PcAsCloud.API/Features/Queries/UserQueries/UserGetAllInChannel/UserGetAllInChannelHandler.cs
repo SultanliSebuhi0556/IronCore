@@ -7,7 +7,7 @@ public class UserGetAllInChannelHandler(IUserService _userService, IMapper _mapp
 {
     public async Task<IEnumerable<UserGetAllInChannelResponse>> Handle(UserGetAllInChannelRequest request, CancellationToken cancellationToken)
     {
-        var result = await _userService.GetAllUsersInChannelAsync(request.ChannelId);
+        var result = await _userService.GetAllUsersInChannelAsync(request.ChannelId, cancellationToken);
         return _mapper.Map<IEnumerable<UserGetAllInChannelResponse>>(result);
     }
 }

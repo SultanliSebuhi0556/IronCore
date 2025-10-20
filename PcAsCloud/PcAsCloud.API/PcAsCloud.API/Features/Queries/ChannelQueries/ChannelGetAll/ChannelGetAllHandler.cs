@@ -7,7 +7,7 @@ public class ChannelGetAllHandler(IChannelServices _channelServices, IMapper _ma
 {
     public async Task<IEnumerable<ChannelGetAllResponse>> Handle(ChannelGetAllRequest request, CancellationToken cancellationToken)
     {
-        var result = await _channelServices.GetAllChannelsAsync();
+        var result = await _channelServices.GetAllChannelsAsync(cancellationToken);
         return _mapper.Map<IEnumerable<ChannelGetAllResponse>>(result);
     }
 }
