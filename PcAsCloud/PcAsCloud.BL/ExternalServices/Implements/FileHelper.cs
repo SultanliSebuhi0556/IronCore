@@ -1,12 +1,16 @@
-﻿using PcAsCloud.BL.ExternalServices.Instances;
+﻿using Microsoft.AspNetCore.Http;
+using PcAsCloud.BL.ExternalServices.Instances;
 
 namespace PcAsCloud.BL.ExternalServices.Implements;
 public class FileHelper : IFileHelper
 {
     private static readonly string basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Test");
 
-    public async Task<string> SaveFileAsync(string folderName, string fileName, Stream file, CancellationToken cancellationToken = default)
+    public async Task<string> SaveFileAsync(string folderName, string fileName, Stream? stream, IFormFile? file, CancellationToken cancellationToken = default)
     {
+        if (file == null && stream == null) throw new Exception("one must exist"); //TODO: ex
+        if (file != null && stream != null) throw new Exception("one must null"); //TODO: ex
+
         string folderPath = Path.Combine(basePath, folderName);
         Directory.CreateDirectory(folderPath);
 
@@ -16,9 +20,12 @@ public class FileHelper : IFileHelper
         }
 
         string filePath = Path.Combine(folderPath, fileName);
-
         await using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
-        await file.CopyToAsync(fileStream, cancellationToken);
+
+        if (file != null)
+            await file.CopyToAsync(fileStream, cancellationToken);
+        else
+            await stream!.CopyToAsync(fileStream, cancellationToken);
         return fileName;
     }
 

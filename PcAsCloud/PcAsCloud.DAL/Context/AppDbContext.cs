@@ -8,6 +8,7 @@ public class AppDbContext : IdentityDbContext<AppUser>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+    public DbSet<Storage> Storages { get; set; }
     public DbSet<Channel> Channels { get; set; }
     public DbSet<Message> Messages { get; set; }
 

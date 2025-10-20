@@ -2,14 +2,14 @@
 - [x] Implement CQRS
 - [x] Cnage the name of "LoginOrRegisterAndLogin" to "LoginOrRegister"
 - [x] delete todo
-- [ ] Defaoul Profile image and SetProfileImage
+- [X] Defaoul Profile image and SetProfileImage
 - [ ] Exceptions
 - [ ] Validations
 - [ ] Add has readed to messages (when get read gonna be true)
 - [x] Add Get All users by channel id
 - [ ] Add MarkAsRead 
-- [ ] Add Pagination
+- [ ] Add Pagination and filtering
 - [x] Remove unneccecery DTOs
-- [ ] Add cancelationTokens to all methods in services
+- [x] Add cancelationTokens to all methods in services
 - [ ] Make app to store file names in db so u can get file list later
-- [ ] Test All current enpoints
+- [x] Test All current enpoints

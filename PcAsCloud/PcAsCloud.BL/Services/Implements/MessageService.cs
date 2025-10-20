@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using PcAsCloud.BL.DTOs.Message;
 using PcAsCloud.BL.Enums;
 using PcAsCloud.BL.Exceptions.CommonExceptions;
+using PcAsCloud.BL.ExternalServices.Instances;
 using PcAsCloud.BL.Services.Instances;
-using PcAsCloud.BL.Services.Services.Instances;
 using PcAsCloud.CORE.Entities;
 using PcAsCloud.DAL.Context;
 
@@ -15,7 +15,7 @@ namespace PcAsCloud.BL.Services.Services.Implements;
 public class MessageService(
     AppDbContext _context,
     IChannelServices _channelServices,
-    IStorageService _storageService,
+    IFileHelper _fileHelper,
     IHttpContextAccessor _httpContextAccessor,
     UserManager<AppUser> _userManager,
     IValidator<MessageCreateDTO> _validator,
@@ -43,8 +43,12 @@ public class MessageService(
 
         if (dto.File != null)
         {
-            var newFileName = $"{dto.ChannelId}_{Guid.NewGuid()}";
-            //var resultPath = await _storageService.SaveFileAsync(dto.File, newFileName, cancellationToken);
+            var newFileName = 0;
+            var storage = await _context.Storages.Where(x => x.ChannelId == channel.Id.ToString()).OrderByDescending(x => x.FileName).FirstOrDefaultAsync(cancellationToken);
+            if (storage != null) newFileName = Convert.ToInt32(storage.FileName) + 1;
+
+            await _context.Storages.AddAsync(new Storage { AppUser = user, ChannelId = channel.Id.ToString(), FileName =  }, cancellationToken);
+            var result = _fileHelper.SaveFileAsync(Path.Combine("@ChannelFiles", channel.Id.ToString()), "ss", null, dto.File, cancellationToken);
             //message.FileUrl = resultPath;
         }
 

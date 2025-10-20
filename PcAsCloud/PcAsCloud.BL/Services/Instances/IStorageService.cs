@@ -6,5 +6,5 @@ public interface IStorageService
 {
     Task<string> SaveFileAsync(UploadFileDTO dto, CancellationToken cancellationToken);
     Task<MemoryStream> GetFileAsync(string fileName, CancellationToken cancellationToken);
-    Task DeleteFileAsync(string fileName);
+    Task DeleteFileAsync(string fileName, CancellationToken cancellationToken);
 }
