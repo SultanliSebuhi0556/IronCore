@@ -96,7 +96,7 @@ public class ChannelServices(
         return channel.Id.ToString();
     }
 
-    public async Task ArchiveUnarchiveChannelAsync(string id)
+    public async Task<bool> ArchiveUnarchiveChannelAsync(string id)
     {
         var target = await _context.Channels.FirstOrDefaultAsync(x => x.Id.ToString() == id);
         if (target == null) throw new NotFoundException<Channel>();
@@ -109,6 +109,7 @@ public class ChannelServices(
 
         target.IsArchived = target.IsArchived ? false : true;
         await _context.SaveChangesAsync();
+        return target.IsArchived;
     }
 
     public async Task DeleteChannelAsync(string id)

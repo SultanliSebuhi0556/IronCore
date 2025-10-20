@@ -60,7 +60,7 @@ public class MessageService(
         };
     }
 
-    public async Task ArchiveUnarchiveMessageAsync(string id)
+    public async Task<bool> ArchiveUnarchiveMessageAsync(string id)
     {
         var target = await _context.Messages.FirstOrDefaultAsync(x => x.Id.ToString() == id);
         if (target == null) throw new NotFoundException<Message>();
@@ -73,6 +73,7 @@ public class MessageService(
 
         target.IsArchived = target.IsArchived ? false : true;
         await _context.SaveChangesAsync();
+        return target.IsArchived;
     }
 
     public async Task DeleteMessageAsync(string id)

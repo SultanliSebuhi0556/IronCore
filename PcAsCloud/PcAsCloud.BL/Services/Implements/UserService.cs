@@ -24,6 +24,13 @@ public class UserService(
         return result;
     }
 
+    public async Task<IEnumerable<UserGetDTO>> GetAllUsersInChannelAsync(string channelId)
+    {
+        var users = await _userManager.Users.Include(x => x.ChannelUsers).Where(x => x.ChannelUsers.Any(x => x.ChannelId.ToString() == channelId)).ToListAsync();
+        var result = _mapper.Map<IEnumerable<UserGetDTO>>(users);
+        return result;
+    }
+
     public async Task<UserGetDTO> GetUserByIdAsync(string id)
     {
         var result = await _userManager.FindByIdAsync(id);
@@ -61,7 +68,7 @@ public class UserService(
         await _signInManager.SignOutAsync();
     }
 
-    public Task SetProfileImageAsync(string userId, IFormFile image)
+    public Task SetProfileImageAsync(ChangeProfileImageDTO dto)
     {
         throw new NotImplementedException();
     }

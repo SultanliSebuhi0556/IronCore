@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using PcAsCloud.BL.DTOs.Storage;
 using PcAsCloud.BL.Exceptions.CommonExceptions;
 using PcAsCloud.BL.ExternalServices.Instances;
 using PcAsCloud.BL.Services.Services.Instances;
@@ -25,18 +26,18 @@ public class StorageService : IStorageService
         return await _fileHelper.GetFileAsync(user.UserName!, fileName, cancellationToken);
     }
 
-    public async Task<string> SaveFileAsync(IFormFile file, string? newFileName, CancellationToken cancellationToken)
+    public async Task<string> SaveFileAsync(UploadFileDTO dto, CancellationToken cancellationToken)
     {
-        if (file == null || file.Length == 0) throw new Exception("No file uploaded"); //TODO: exc
+        if (dto.File == null || dto.File.Length == 0) throw new Exception("No file uploaded"); //TODO: exc
 
         var user = await _getCurrentUserAsync();
 
-        await using var stream = file.OpenReadStream();
+        await using var stream = dto.File.OpenReadStream();
 
-        string fileName = file.FileName;
+        string fileName = dto.File.FileName;
 
-        if (!String.IsNullOrWhiteSpace(newFileName))
-            fileName = newFileName + Path.GetExtension(file.FileName);
+        if (!String.IsNullOrWhiteSpace(dto.NewFileName))
+            fileName = dto.NewFileName + Path.GetExtension(dto.File.FileName);
 
         return await _fileHelper.SaveFileAsync(user.UserName!, fileName, stream, cancellationToken);
     }

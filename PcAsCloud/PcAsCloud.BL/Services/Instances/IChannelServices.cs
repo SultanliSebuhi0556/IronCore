@@ -9,5 +9,5 @@ public interface IChannelServices
     Task<ChannelGetDTO> GetChannelByIdAsync(string id);
     Task<IEnumerable<ChannelGetDTO>> GetAllChannelsAsync();
     Task DeleteChannelAsync(string id);
-    Task ArchiveUnarchiveChannelAsync(string id);
+    Task<bool> ArchiveUnarchiveChannelAsync(string id);
 }
