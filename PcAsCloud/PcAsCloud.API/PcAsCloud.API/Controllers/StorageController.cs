@@ -13,21 +13,21 @@ namespace PcAsCloud.API.Controllers;
 public class StorageController(IMediator _mediator) : ControllerBase
 {
     [HttpPost("[action]")]
-    public async Task<IActionResult> UploadFile(StorageUploadFileRequest request)
+    public async Task<IActionResult> UploadFile([FromQuery] StorageUploadFileRequest request)
     {
         return Ok(await _mediator.Send(request));
     }
 
     [HttpPost("[action]")]
-    public async Task<IActionResult> DownloadFile(StorageDownloadFileRequest request)
+    public async Task<IActionResult> DownloadFile([FromQuery] StorageDownloadFileRequest request)
     {
         var result = await _mediator.Send(request);
         result.Stream.Position = 0;
-        return File(result.Stream, "application/octet-stream", request.FileName);
+        return File(result.Stream, "application/octet-stream", result.FileName);
     }
 
     [HttpDelete("[action]")]
-    public async Task<IActionResult> DeleteFile(StorageDeleteFileRequest request)
+    public async Task<IActionResult> DeleteFile([FromQuery] StorageDeleteFileRequest request)
     {
         return Ok(await _mediator.Send(request));
     }

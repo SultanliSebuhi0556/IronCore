@@ -101,13 +101,17 @@ public class ChannelServices(
         var target = await _context.Channels.Include(x => x.ChannelUsers).FirstOrDefaultAsync(x => x.Id.ToString() == id, cancellationToken);
         if (target == null) throw new NotFoundException<Channel>();
 
-        var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);
+        var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext!.User);
         if (user == null) throw new NotFoundException<AppUser>();
 
         var rolesOfUser = await _userManager.GetRolesAsync(user);
         if (!target.ChannelUsers.Any(x => x.AppUser == user) && !rolesOfUser.Contains(nameof(UserRoles.Admin))) throw new Exception("cant delete this message "); //TODO: ex
 
+        if (target.IsArchived) target.ArchiveDate = DateTime.UtcNow;
+        else target.ArchiveDate = null;
+
         target.IsArchived = target.IsArchived ? false : true;
+
         await _context.SaveChangesAsync(cancellationToken);
         return target.IsArchived;
     }

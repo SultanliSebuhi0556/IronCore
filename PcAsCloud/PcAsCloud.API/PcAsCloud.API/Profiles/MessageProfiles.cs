@@ -9,8 +9,9 @@ public class MessageProfiles : Profile
 {
     public MessageProfiles()
     {
-        CreateMap<MessageGetDTO, MessageGetChannelMessagesResponse>();
         CreateMap<MessageCreateRequest, MessageCreateDTO>();
         CreateMap<Message, MessageGetDTO>();
+        CreateMap<MessageGetDTO, MessageGetChannelMessagesResponse>()
+            .ForMember(dest => dest.SendedByUserId, opt => opt.MapFrom(src => src.SendedById));
     }
 }

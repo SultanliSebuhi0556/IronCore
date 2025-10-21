@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using PcAsCloud.BL.DTOs.Message;
 using PcAsCloud.BL.Enums;
 using PcAsCloud.BL.Exceptions.CommonExceptions;
-using PcAsCloud.BL.ExternalServices.Instances;
 using PcAsCloud.BL.Services.Instances;
+using PcAsCloud.BL.Services.Services.Instances;
 using PcAsCloud.CORE.Entities;
 using PcAsCloud.DAL.Context;
 
@@ -15,7 +15,7 @@ namespace PcAsCloud.BL.Services.Services.Implements;
 public class MessageService(
     AppDbContext _context,
     IChannelServices _channelServices,
-    IFileHelper _fileHelper,
+    IStorageService _storageService,
     IHttpContextAccessor _httpContextAccessor,
     UserManager<AppUser> _userManager,
     IValidator<MessageCreateDTO> _validator,
@@ -25,8 +25,7 @@ public class MessageService(
     {
         await _validator.ValidateAndThrowAsync(dto, cancellationToken);
 
-        var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);
-        if (user == null) throw new NotFoundException<AppUser>();
+        var user = await _getCurrentUserAsync();
 
         var message = new Message
         {
@@ -41,25 +40,20 @@ public class MessageService(
         if (!channel.ChannelUsers.Any(x => x.AppUser == message.SendedBy))
             throw new Exception("cant send message in this chat"); //TODO: ex
 
+        await _context.AddAsync(message, cancellationToken);
+
+        var response = new MessageCreateResponseDTO { Id = message.Id.ToString() };
+
         if (dto.File != null)
         {
-            var newFileName = 0;
-            var storage = await _context.Storages.Where(x => x.ChannelId == channel.Id.ToString()).OrderByDescending(x => x.FileName).FirstOrDefaultAsync(cancellationToken);
-            if (storage != null) newFileName = Convert.ToInt32(storage.FileName) + 1;
-
-            await _context.Storages.AddAsync(new Storage { AppUser = user, ChannelId = channel.Id.ToString(), FileName =  }, cancellationToken);
-            var result = _fileHelper.SaveFileAsync(Path.Combine("@ChannelFiles", channel.Id.ToString()), "ss", null, dto.File, cancellationToken);
-            //message.FileUrl = resultPath;
+            var result = await _storageService.SaveFileAsync(new DTOs.Storage.UploadFileDTO() { File = dto.File, NewFolderName = Path.Combine("@ChannelFiles", channel.Id.ToString()), NewFileName = Guid.NewGuid().ToString() }, cancellationToken);
+            message.StorageId = result.StorageId;
+            response.FileName = result.FileName;
+            response.StorageId = result.StorageId.ToString();
         }
 
-        await _context.AddAsync(message, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
-
-        return new MessageCreateResponseDTO
-        {
-            Id = message.Id.ToString(),
-            FilePath = message.FileUrl
-        };
+        return response;
     }
 
     public async Task<bool> ArchiveUnarchiveMessageAsync(string id, CancellationToken cancellationToken)
@@ -67,13 +61,16 @@ public class MessageService(
         var target = await _context.Messages.FirstOrDefaultAsync(x => x.Id.ToString() == id, cancellationToken);
         if (target == null) throw new NotFoundException<Message>();
 
-        var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);
-        if (user == null) throw new NotFoundException<AppUser>();
+        var user = await _getCurrentUserAsync();
 
         var rolesOfUser = await _userManager.GetRolesAsync(user);
         if (target.SendedById != user.Id && !rolesOfUser.Contains(nameof(UserRoles.Admin))) throw new Exception("cant delete this message "); //TODO: ex
 
+        if (target.IsArchived) target.ArchiveDate = DateTime.UtcNow;
+        else target.ArchiveDate = null;
+
         target.IsArchived = target.IsArchived ? false : true;
+
         await _context.SaveChangesAsync(cancellationToken);
         return target.IsArchived;
     }
@@ -83,8 +80,7 @@ public class MessageService(
         var target = await _context.Messages.FirstOrDefaultAsync(x => x.Id.ToString() == id, cancellationToken);
         if (target == null) throw new NotFoundException<Message>();
 
-        var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext?.User);
-        if (user == null) throw new NotFoundException<AppUser>();
+        var user = await _getCurrentUserAsync();
 
         var rolesOfUser = await _userManager.GetRolesAsync(user);
         if (target.SendedById != user.Id && !rolesOfUser.Contains(nameof(UserRoles.Admin))) throw new Exception("cant delete this message "); //TODO: ex
@@ -95,8 +91,16 @@ public class MessageService(
 
     public async Task<IEnumerable<MessageGetDTO>> GetAllMessagesByChannelIdAsync(string channelId, CancellationToken cancellationToken)
     {
-        var channel = await _context.Channels.Include(x => x.Messages).ThenInclude(x => x.SendedBy).FirstOrDefaultAsync(x => x.Id.ToString() == channelId, cancellationToken);
+        var channel = await _context.Channels.Include(x => x.ChannelUsers).Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id.ToString() == channelId, cancellationToken);
         if (channel == null) throw new NotFoundException<Channel>();
+
+        if (channel.IsDirect)
+        {
+            var user = await _getCurrentUserAsync();
+            if (!channel.ChannelUsers.Any(x => x.AppUser == user)) throw new Exception("u are not in this channel"); //TODO: ex
+            channel.Messages.Where(x => x.SendedById != user.Id).ToList().ForEach(x => x.IsRead = true);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
 
         return _mapper.Map<IEnumerable<MessageGetDTO>>(channel.Messages);
     }
@@ -105,6 +109,22 @@ public class MessageService(
     {
         var message = await _context.Messages.FirstOrDefaultAsync(x => x.Id.ToString() == id, cancellationToken);
         if (message == null) throw new NotFoundException<Message>();
+
+        var user = await _getCurrentUserAsync();
+        var channel = await _context.Channels.FirstOrDefaultAsync(x => x.Id == message.ChannelId);
+        if (channel!.IsDirect && message.SendedById != user.Id)
+        {
+            message.IsRead = true;
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
         return _mapper.Map<MessageGetDTO>(message);
+    }
+
+    private async Task<AppUser> _getCurrentUserAsync()
+    {
+        var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext!.User);
+        if (user == null) throw new NotFoundException<AppUser>();
+        return user;
     }
 }

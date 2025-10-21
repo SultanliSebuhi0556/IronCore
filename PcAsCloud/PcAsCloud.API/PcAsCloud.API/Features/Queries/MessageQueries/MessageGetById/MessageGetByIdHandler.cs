@@ -11,7 +11,8 @@ public class MessageGetByIdHandler(IMessageService _messageService) : IRequestHa
         {
             Id = result.Id,
             Content = result.Content,
-            FileUrl = result.FileUrl,
+            StorageId = result.StorageId,
+            IsRead = result.IsRead,
             SendedByUserId = result.SendedById,
         };
     }

@@ -24,13 +24,19 @@ public class StorageService : IStorageService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<MemoryStream> GetFileAsync(string fileName, CancellationToken cancellationToken)
+    public async Task<GetFileResultDTO> GetFileAsync(GetFileDTO dto, CancellationToken cancellationToken)
     {
         var user = await _getCurrentUserAsync();
-        return await _fileHelper.GetFileAsync(user.UserName!, fileName, cancellationToken);
+        var folderName = dto.ChannelId != null ? Path.Combine("@ChannelFiles", dto.ChannelId) : user.UserName!;
+
+        var storage = await _context.Storages.FirstOrDefaultAsync(x => x.Id.ToString() == dto.StorageId);
+        if (storage == null) throw new NotFoundException<Storage>();
+
+        var stream = await _fileHelper.GetFileAsync(folderName, storage.FileName, cancellationToken);
+        return new() { Stream = stream, FileName = storage.FileName };
     }
 
-    public async Task<string> SaveFileAsync(UploadFileDTO dto, CancellationToken cancellationToken)
+    public async Task<UploadFileResultDTO> SaveFileAsync(UploadFileDTO dto, CancellationToken cancellationToken)
     {
         if (dto.File == null || dto.File.Length == 0) throw new Exception("No file uploaded"); //TODO: exc
 
@@ -43,23 +49,27 @@ public class StorageService : IStorageService
         if (!String.IsNullOrWhiteSpace(dto.NewFileName))
             fileName = dto.NewFileName + Path.GetExtension(dto.File.FileName);
 
-        await _context.Storages.AddAsync(new Storage { AppUser = user, FileName = fileName }, cancellationToken);
+        var newFileName = await _fileHelper.SaveFileAsync(dto.NewFolderName ?? user.UserName!, fileName, stream, null, cancellationToken);
+
+        var storage = new Storage { AppUser = user, FileName = newFileName };
+        await _context.Storages.AddAsync(storage, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return await _fileHelper.SaveFileAsync(user.UserName!, fileName, stream, null, cancellationToken);
+        return new() { StorageId = storage.Id, FileName = newFileName };
     }
 
-    public async Task DeleteFileAsync(string fileName, CancellationToken cancellationToken)
+    public async Task DeleteFileAsync(DeleteFileDTO dto, CancellationToken cancellationToken)
     {
         var user = await _getCurrentUserAsync();
 
-        var target = await _context.Storages.Include(x => x.AppUser).FirstOrDefaultAsync(x => x.AppUser == user && x.FileName == fileName, cancellationToken);
+        var target = await _context.Storages.Include(x => x.AppUser).FirstOrDefaultAsync(x => x.Id.ToString() == dto.StorageId, cancellationToken);
         if (target == null) throw new NotFoundException<Storage>();
+
+        var folderName = dto.ChannelId != null ? Path.Combine("@ChannelFiles", dto.ChannelId) : user.UserName!;
+        await _fileHelper.DeleteFileAsync(folderName, target.FileName);
 
         await Task.Run(() => _context.Remove(target));
         await _context.SaveChangesAsync(cancellationToken);
-
-        await _fileHelper.DeleteFileAsync(user.UserName!, fileName);
     }
 
     private async Task<AppUser> _getCurrentUserAsync()

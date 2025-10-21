@@ -13,10 +13,25 @@ namespace PcAsCloud.DAL.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "AspNetRoles",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetUsers",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
+                    ProfileImageUrl = table.Column<string>(type: "text", nullable: false),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -51,6 +66,27 @@ namespace PcAsCloud.DAL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Channels", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetRoleClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RoleId = table.Column<string>(type: "text", nullable: false),
+                    ClaimType = table.Column<string>(type: "text", nullable: true),
+                    ClaimValue = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -95,6 +131,30 @@ namespace PcAsCloud.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AspNetUserRoles",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    RoleId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
@@ -115,19 +175,39 @@ namespace PcAsCloud.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Storages",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FileName = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    AppUserId = table.Column<string>(type: "character varying(450)", maxLength: 450, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Storages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Storages_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ChannelUsers",
                 columns: table => new
                 {
                     ChannelId = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<string>(type: "character varying(450)", maxLength: 450, nullable: false),
+                    AppUserId = table.Column<string>(type: "character varying(450)", maxLength: 450, nullable: false),
                     JoinedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ChannelUsers", x => new { x.ChannelId, x.UserId });
+                    table.PrimaryKey("PK_ChannelUsers", x => new { x.ChannelId, x.AppUserId });
                     table.ForeignKey(
-                        name: "FK_ChannelUsers_AspNetUsers_UserId",
-                        column: x => x.UserId,
+                        name: "FK_ChannelUsers_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -145,8 +225,9 @@ namespace PcAsCloud.DAL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Content = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: true),
-                    FileUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    IsRead = table.Column<bool>(type: "boolean", nullable: false),
                     ChannelId = table.Column<Guid>(type: "uuid", nullable: false),
+                    StorageId = table.Column<Guid>(type: "uuid", nullable: true),
                     SendedById = table.Column<string>(type: "character varying(450)", maxLength: 450, nullable: false),
                     IsArchived = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -167,7 +248,24 @@ namespace PcAsCloud.DAL.Migrations
                         principalTable: "Channels",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Messages_Storages_StorageId",
+                        column: x => x.StorageId,
+                        principalTable: "Storages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetRoleClaims_RoleId",
+                table: "AspNetRoleClaims",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "RoleNameIndex",
+                table: "AspNetRoles",
+                column: "NormalizedName",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
@@ -178,6 +276,11 @@ namespace PcAsCloud.DAL.Migrations
                 name: "IX_AspNetUserLogins_UserId",
                 table: "AspNetUserLogins",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserRoles_RoleId",
+                table: "AspNetUserRoles",
+                column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",
@@ -206,14 +309,14 @@ namespace PcAsCloud.DAL.Migrations
                 column: "IsDirect");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ChannelUsers_AppUserId",
+                table: "ChannelUsers",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ChannelUsers_JoinedDate",
                 table: "ChannelUsers",
                 column: "JoinedDate");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ChannelUsers_UserId",
-                table: "ChannelUsers",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_ChannelId",
@@ -234,16 +337,37 @@ namespace PcAsCloud.DAL.Migrations
                 name: "IX_Messages_SendedById",
                 table: "Messages",
                 column: "SendedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_StorageId",
+                table: "Messages",
+                column: "StorageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Storages_AppUserId",
+                table: "Storages",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Storages_CreatedDate",
+                table: "Storages",
+                column: "CreatedDate");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AspNetRoleClaims");
+
+            migrationBuilder.DropTable(
                 name: "AspNetUserClaims");
 
             migrationBuilder.DropTable(
                 name: "AspNetUserLogins");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
@@ -255,10 +379,16 @@ namespace PcAsCloud.DAL.Migrations
                 name: "Messages");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "Channels");
+
+            migrationBuilder.DropTable(
+                name: "Storages");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
         }
     }
 }

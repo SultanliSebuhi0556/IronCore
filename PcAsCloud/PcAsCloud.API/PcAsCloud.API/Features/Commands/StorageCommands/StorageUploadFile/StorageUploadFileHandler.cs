@@ -8,7 +8,7 @@ public class StorageUploadFileHandler(IStorageService _storageService, IMapper _
 {
     public async Task<StorageUploadFileResponse> Handle(StorageUploadFileRequest request, CancellationToken cancellationToken)
     {
-        var fileName = await _storageService.SaveFileAsync(_mapper.Map<UploadFileDTO>(request), cancellationToken);
-        return new() { FileName = fileName };
+        var dto = await _storageService.SaveFileAsync(_mapper.Map<UploadFileDTO>(request), cancellationToken);
+        return new() { StorageId = dto.StorageId.ToString(), FileName = dto.FileName };
     }
 }

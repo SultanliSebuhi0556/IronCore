@@ -18,9 +18,6 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.Property(m => m.Content)
             .HasMaxLength(4000);
 
-        builder.Property(m => m.FileUrl)
-            .HasMaxLength(500);
-
         builder.Property(m => m.ChannelId)
             .IsRequired();
 
@@ -40,6 +37,7 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
 
         builder.HasIndex(m => m.ChannelId);
         builder.HasIndex(m => m.SendedById);
+        builder.HasIndex(m => m.StorageId);
         builder.HasIndex(m => m.CreatedDate);
         builder.HasIndex(m => m.IsArchived);
 
@@ -52,5 +50,10 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
             .WithMany()
             .HasForeignKey(m => m.SendedById)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(m => m.Storage)
+           .WithMany()
+           .HasForeignKey(m => m.StorageId)
+           .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -298,19 +298,21 @@ namespace PcAsCloud.DAL.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("FileUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
                     b.Property<bool>("IsArchived")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false);
 
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("SendedById")
                         .IsRequired()
                         .HasMaxLength(450)
                         .HasColumnType("character varying(450)");
+
+                    b.Property<Guid?>("StorageId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -322,7 +324,37 @@ namespace PcAsCloud.DAL.Migrations
 
                     b.HasIndex("SendedById");
 
+                    b.HasIndex("StorageId");
+
                     b.ToTable("Messages", (string)null);
+                });
+
+            modelBuilder.Entity("PcAsCloud.CORE.Entities.Storage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AppUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("CreatedDate");
+
+                    b.ToTable("Storages", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -409,9 +441,27 @@ namespace PcAsCloud.DAL.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("PcAsCloud.CORE.Entities.Storage", "Storage")
+                        .WithMany()
+                        .HasForeignKey("StorageId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Channel");
 
                     b.Navigation("SendedBy");
+
+                    b.Navigation("Storage");
+                });
+
+            modelBuilder.Entity("PcAsCloud.CORE.Entities.Storage", b =>
+                {
+                    b.HasOne("PcAsCloud.CORE.Entities.AppUser", "AppUser")
+                        .WithMany()
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
                 });
 
             modelBuilder.Entity("PcAsCloud.CORE.Entities.AppUser", b =>

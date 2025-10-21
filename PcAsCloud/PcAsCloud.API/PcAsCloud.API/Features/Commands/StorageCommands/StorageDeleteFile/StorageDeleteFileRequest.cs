@@ -3,5 +3,6 @@
 namespace PcAsCloud.API.Features.Commands.StorageCommands.StorageDeleteFile;
 public class StorageDeleteFileRequest : IRequest<StorageDeleteFileResponse>
 {
-    public string FileName { get; set; }
+    public string StorageId { get; set; }
+    public string? ChannelId { get; set; }
 }

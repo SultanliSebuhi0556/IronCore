@@ -2,4 +2,5 @@
 public class StorageDownloadFileResponse
 {
     public MemoryStream Stream { get; set; }
+    public string FileName { get; set; }
 }

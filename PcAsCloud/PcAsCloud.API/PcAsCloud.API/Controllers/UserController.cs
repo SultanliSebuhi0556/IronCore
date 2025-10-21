@@ -21,7 +21,7 @@ public class UserController(IMediator _mediator) : ControllerBase
 
     [Authorize]
     [HttpPost("[action]")]
-    public async Task<IActionResult> LoginOut([FromQuery] UserLogoutRequest request)
+    public async Task<IActionResult> LogOut([FromQuery] UserLogoutRequest request)
     {
         return Ok(await _mediator.Send(request));
 

@@ -5,13 +5,12 @@
 - [X] Defaoul Profile image and SetProfileImage
 - [ ] Exceptions
 - [ ] Validations
-- [ ] Add has readed to messages (when get read gonna be true)
 - [x] Add Get All users by channel id
-- [ ] Add MarkAsRead 
+- [x] Add has readed to messages (when get read gonna be true)
 - [ ] Add Pagination and filtering
 - [x] Remove unneccecery DTOs
 - [x] Add cancelationTokens to all methods in services
-- [ ] Make app to store file names in db so u can get file list later
+- [x] Make app to store file names in db so u can get file list later
 - [x] Test All current enpoints
-- [ ] Archive date does not change seh archiving or unarchiving
-- [ ] change LoginOut to LogOut
+- [x] Archive date does not change seh archiving or unarchiving
+- [x] change LoginOut to LogOut
