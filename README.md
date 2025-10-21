@@ -13,3 +13,5 @@
 - [x] Add cancelationTokens to all methods in services
 - [ ] Make app to store file names in db so u can get file list later
 - [x] Test All current enpoints
+- [ ] Archive date does not change seh archiving or unarchiving
+- [ ] change LoginOut to LogOut
