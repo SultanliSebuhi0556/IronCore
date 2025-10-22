@@ -1,7 +1,0 @@
-﻿using MediatR;
-
-namespace PcAsCloud.API.Features.Commands.ChannelCommands.ChannelLeave;
-public class ChannelLeaveRequest : IRequest<ChannelLeaveResponse>
-{
-    public string Id { get; set; }
-}
