@@ -1,16 +1,4 @@
 ## TODO
-- [x] Implement CQRS
-- [x] Cnage the name of "LoginOrRegisterAndLogin" to "LoginOrRegister"
-- [x] delete todo
-- [X] Defaoul Profile image and SetProfileImage
 - [ ] Exceptions
 - [ ] Validations
-- [x] Add Get All users by channel id
-- [x] Add has readed to messages (when get read gonna be true)
 - [ ] Add Pagination and filtering
-- [x] Remove unneccecery DTOs
-- [x] Add cancelationTokens to all methods in services
-- [x] Make app to store file names in db so u can get file list later
-- [x] Test All current enpoints
-- [x] Archive date does not change seh archiving or unarchiving
-- [x] change LoginOut to LogOut

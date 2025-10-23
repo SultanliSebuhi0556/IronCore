@@ -16,11 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\IronCore.BL\IronCore.BL.csproj" />
+    <Folder Include="wwwroot\data\profile_images\user_profile_images\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\data\profile_images\user_profile_images\" />
+    <ProjectReference Include="..\IronCore.BL\IronCore.BL.csproj" />
   </ItemGroup>
 
 </Project>
