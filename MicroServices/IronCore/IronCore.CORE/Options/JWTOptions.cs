@@ -1,4 +1,4 @@
-﻿namespace IronCore.BL.Options;
+﻿namespace IronCore.CORE.Options;
 
 public record JWTOptions
 {

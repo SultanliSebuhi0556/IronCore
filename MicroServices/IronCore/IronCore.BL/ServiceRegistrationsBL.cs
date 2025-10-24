@@ -2,9 +2,9 @@
 using FluentValidation.AspNetCore;
 using IronCore.BL.ExternalServices.Implements;
 using IronCore.BL.ExternalServices.Instances;
-using IronCore.BL.Options;
 using IronCore.BL.Services.Implements;
 using IronCore.BL.Services.Instances;
+using IronCore.CORE.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,7 +14,7 @@ public static class ServiceRegistrationsBL
     public static IServiceCollection AddBlServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHttpContextAccessor();
-        services.AddServices();
+        services.AddScopes();
         services.AddCustomOptions(configuration);
         services.AddFluentValidation();
         return services;
@@ -24,7 +24,7 @@ public static class ServiceRegistrationsBL
         services.Configure<JWTOptions>(configuration.GetSection("ExternalServices:JwtOptions"));
         return services;
     }
-    private static IServiceCollection AddServices(this IServiceCollection services)
+    private static IServiceCollection AddScopes(this IServiceCollection services)
     {
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IChannelServices, ChannelServices>();

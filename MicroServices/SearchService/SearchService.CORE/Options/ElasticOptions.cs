@@ -1,4 +1,4 @@
-﻿namespace SearchService.DAL.Options;
+﻿namespace SearchService.CORE.Options;
 public class ElasticOptions
 {
     public string Url { get; set; }

@@ -1,9 +1,10 @@
 ﻿using Elastic.Clients.Elasticsearch;
+using Elastic.Clients.Elasticsearch.QueryDsl;
 using Elastic.Transport;
 using Microsoft.Extensions.Options;
 using SearchService.CORE.Entities;
+using SearchService.CORE.Options;
 using SearchService.CORE.RepositoryInstances;
-using SearchService.DAL.Options;
 
 namespace SearchService.DAL.RepositoryImplements;
 public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity, new()
@@ -21,39 +22,37 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity, 
         _client = new ElasticsearchClient(settings);
     }
 
-    public async Task CreateIndexIfNotExistAsync(string indexName, CancellationToken cancellationToken)
+    public async Task CreateIndexIfNotExistAsync(string? indexName, CancellationToken cancellationToken)
     {
         if (!_client.Indices.Exists(indexName).Exists)
             await _client.Indices.CreateAsync(indexName, cancellationToken);
     }
 
-    public async Task<bool> AddOrUpdateAsync(T entity, CancellationToken cancellationToken)
+    public async Task<bool> AddOrUpdateAsync(T entity, string? indexName, CancellationToken cancellationToken)
     {
-        var response = await _client.IndexAsync(entity, x => x.Index(_options.DefaultIndex).OpType(OpType.Index), cancellationToken);
+        var response = await _client.IndexAsync(entity, x => x.Index(indexName).OpType(OpType.Index), cancellationToken);
         return response.IsValidResponse;
     }
 
-    public async Task<bool> AddOrUpdateRangeAsync(IEnumerable<T> entities, string indexName, CancellationToken cancellationToken)
+    public async Task<bool> AddOrUpdateRangeAsync(IEnumerable<T> entities, string? indexName, CancellationToken cancellationToken)
     {
-        var response = await _client.BulkAsync(x => x.Index(_options.DefaultIndex).UpdateMany(entities, (y, x) => y.Doc(x).DocAsUpsert(true)), cancellationToken);
+        var response = await _client.BulkAsync(x => x.Index(indexName).UpdateMany(entities, (y, x) => y.Doc(x).DocAsUpsert(true)), cancellationToken);
         return response.IsValidResponse;
     }
 
-    public async Task<T> GetAsyncByKey(string key, CancellationToken cancellationToken)
+    public async Task<IEnumerable<T>> GetAsync(string? searchText, string? indexName, CancellationToken cancellationToken)
     {
-        var response = await _client.GetAsync<T>(key, x => x.Index(_options.DefaultIndex), cancellationToken);
-        return response.Source;
+        var searchRequest = new SearchRequest(indexName)
+        {
+            Query = string.IsNullOrWhiteSpace(searchText) ? new MatchAllQuery() : new MatchQuery { Field = "searchText", Query = searchText }
+        };
+        var response = await _client.SearchAsync<T>(searchRequest, cancellationToken);
+        return response.IsValidResponse ? response.Documents : Enumerable.Empty<T>();
     }
 
-    public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<bool> RemoveAsync(string key, string? indexName, CancellationToken cancellationToken)
     {
-        var response = await _client.SearchAsync<T>(x => x.Indices(_options.DefaultIndex), cancellationToken);
-        return response.IsValidResponse ? response.Documents : default;
-    }
-
-    public async Task<bool> RemoveAsync(string key, CancellationToken cancellationToken)
-    {
-        var response = await _client.DeleteAsync<T>(key, x => x.Index(_options.DefaultIndex), cancellationToken);
+        var response = await _client.DeleteAsync<T>(key, x => x.Index(indexName), cancellationToken);
         return response.IsValidResponse;
     }
 }

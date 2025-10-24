@@ -1,6 +1,6 @@
 ﻿using IronCore.BL.ExternalServices.Instances;
-using IronCore.BL.Options;
 using IronCore.CORE.Entities;
+using IronCore.CORE.Options;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
