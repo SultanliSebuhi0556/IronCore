@@ -1,5 +1,6 @@
 using IronCore.API;
 using IronCore.API.Extensions;
+using SwaggerThemes;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,10 +17,9 @@ await app.AddSeedData();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(opt =>
+    app.UseSwaggerUI(Theme.UniversalDark, null, opt =>
     {
         opt.EnablePersistAuthorization();
-        opt.InjectStylesheet("/swagger-ui/SwaggerDark.css");
     });
 }
 

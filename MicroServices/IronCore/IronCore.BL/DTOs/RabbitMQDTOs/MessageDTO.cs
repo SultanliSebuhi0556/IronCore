@@ -1,6 +1,7 @@
-﻿namespace SearchService.CORE.Entities;
-public class Message : BaseEntity
+﻿namespace IronCore.BL.DTOs.RabbitMQDTOs;
+public record MessageDTO
 {
+    public string Id { get; set; }
     public string? Content { get; set; }
     public bool IsRead { get; set; } = false;
     public string ChannelId { get; set; }

@@ -42,9 +42,9 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity, 
 
     public async Task<IEnumerable<T>> GetAsync(string? searchText, string? indexName, CancellationToken cancellationToken)
     {
-        var searchRequest = new SearchRequest(indexName)
+        var searchRequest = new SearchRequest("messages")
         {
-            Query = string.IsNullOrWhiteSpace(searchText) ? new MatchAllQuery() : new MatchQuery { Field = "searchText", Query = searchText }
+            Query = string.IsNullOrWhiteSpace(searchText) ? new MatchAllQuery() : new MatchQuery { Field = "content", Query = searchText }
         };
         var response = await _client.SearchAsync<T>(searchRequest, cancellationToken);
         return response.IsValidResponse ? response.Documents : Enumerable.Empty<T>();

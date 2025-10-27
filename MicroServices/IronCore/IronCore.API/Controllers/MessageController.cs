@@ -32,6 +32,20 @@ public class MessageController(IMediator _mediator) : ControllerBase
         return Ok(await _mediator.Send(request));
     }
 
+    [HttpGet("[action]")]
+    public async Task<IActionResult> Test(string searchString)
+    {
+        var handler = new HttpClientHandler
+        {
+            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        };
+        var client = new HttpClient(handler);
+        var url = $"https://localhost:7173/api/Message/GetMessages?searchText={Uri.EscapeDataString(searchString)}";
+        var content = await client.GetStringAsync(url);
+        return Content(content, "application/json");
+    }
+
+
     [HttpDelete("[action]")]
     public async Task<IActionResult> DeleteMessage([FromQuery] MessageDeleteRequest request)
     {

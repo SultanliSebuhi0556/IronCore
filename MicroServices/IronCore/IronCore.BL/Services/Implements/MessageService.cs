@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using IronCore.BL.DTOs.Message;
+using IronCore.BL.DTOs.RabbitMQDTOs;
 using IronCore.BL.Exceptions.CommonExceptions;
+using IronCore.BL.ExternalServices.Instances;
 using IronCore.BL.Services.Instances;
 using IronCore.CORE.Entities;
 using IronCore.CORE.Enums;
@@ -9,17 +11,19 @@ using IronCore.DAL.Context;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace IronCore.BL.Services.Implements;
 public class MessageService(
     AppDbContext _context,
-    IChannelServices _channelServices,
     IStorageService _storageService,
     IHttpContextAccessor _httpContextAccessor,
     UserManager<AppUser> _userManager,
     IValidator<MessageCreateDTO> _validator,
+    IRabbitMQPublisher _publisher,
     IMapper _mapper) : IMessageService
 {
+    private const string _routingKey = "message";
     public async Task<MessageCreateResponseDTO?> CreateMessageAsync(MessageCreateDTO dto, CancellationToken cancellationToken)
     {
         await _validator.ValidateAndThrowAsync(dto, cancellationToken);
@@ -40,6 +44,18 @@ public class MessageService(
             throw new Exception("cant send message in this chat"); //TODO: ex
 
         await _context.AddAsync(message, cancellationToken);
+
+        var messageDto = new MessageDTO
+        {
+            Id = message.Id.ToString(),
+            Content = message.Content,
+            IsRead = message.IsRead,
+            ChannelId = message.ChannelId.ToString(),
+            StorageId = message.StorageId?.ToString(),
+            SendedById = message.SendedById
+        };
+        var json = JsonSerializer.Serialize(messageDto);
+        await _publisher.PublishMessagesAsync(json, _routingKey, cancellationToken);
 
         var response = new MessageCreateResponseDTO { Id = message.Id.ToString() };
 

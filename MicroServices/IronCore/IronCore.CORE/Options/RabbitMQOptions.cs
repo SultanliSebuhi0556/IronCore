@@ -1,4 +1,4 @@
-﻿namespace SearchService.CORE.Options;
+﻿namespace IronCore.CORE.Options;
 public class RabbitMQOptions
 {
     public string Uri { get; set; }

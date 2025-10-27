@@ -21,7 +21,8 @@ public static class ServiceRegistrationsBL
     }
     private static IServiceCollection AddCustomOptions(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<JWTOptions>(configuration.GetSection("ExternalServices:JwtOptions"));
+        services.Configure<JWTOptions>(configuration.GetSection($"ExternalServices:{nameof(JWTOptions)}"));
+        services.Configure<RabbitMQOptions>(configuration.GetSection($"ExternalServices:{nameof(RabbitMQOptions)}"));
         return services;
     }
     private static IServiceCollection AddScopes(this IServiceCollection services)
@@ -32,6 +33,7 @@ public static class ServiceRegistrationsBL
         services.AddScoped<ITokenGenerator, TokenGenerator>();
         services.AddScoped<IFileHelper, FileHelper>();
         services.AddScoped<IStorageService, StorageService>();
+        services.AddScoped<IRabbitMQPublisher, RabbitMQPublisher>();
         return services;
     }
     private static void AddFluentValidation(this IServiceCollection services)

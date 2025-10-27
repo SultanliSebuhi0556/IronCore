@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace PcAsCloud.DAL.Migrations
+namespace IronCore.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -21,6 +21,209 @@ namespace PcAsCloud.DAL.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("IronCore.CORE.Entities.AppUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ProfileImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("IronCore.CORE.Entities.Channel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ArchiveDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsArchived")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsDirect")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedDate");
+
+                    b.HasIndex("IsArchived");
+
+                    b.HasIndex("IsDirect");
+
+                    b.ToTable("Channels", (string)null);
+                });
+
+            modelBuilder.Entity("IronCore.CORE.Entities.ChannelUser", b =>
+                {
+                    b.Property<Guid>("ChannelId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AppUserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<DateTime>("JoinedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("ChannelId", "AppUserId");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("JoinedDate");
+
+                    b.ToTable("ChannelUsers", (string)null);
+                });
+
+            modelBuilder.Entity("IronCore.CORE.Entities.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ArchiveDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ChannelId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsArchived")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SendedById")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<Guid?>("StorageId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChannelId");
+
+                    b.HasIndex("CreatedDate");
+
+                    b.HasIndex("IsArchived");
+
+                    b.HasIndex("SendedById");
+
+                    b.HasIndex("StorageId");
+
+                    b.ToTable("Messages", (string)null);
+                });
+
+            modelBuilder.Entity("IronCore.CORE.Entities.Storage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AppUserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("CreatedDate");
+
+                    b.ToTable("Storages", (string)null);
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -154,207 +357,60 @@ namespace PcAsCloud.DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("PcAsCloud.CORE.Entities.AppUser", b =>
+            modelBuilder.Entity("IronCore.CORE.Entities.ChannelUser", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
+                    b.HasOne("IronCore.CORE.Entities.AppUser", "AppUser")
+                        .WithMany("ChannelUsers")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("integer");
+                    b.HasOne("IronCore.CORE.Entities.Channel", "Channel")
+                        .WithMany("ChannelUsers")
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("text");
+                    b.Navigation("AppUser");
 
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("ProfileImageUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex");
-
-                    b.ToTable("AspNetUsers", (string)null);
+                    b.Navigation("Channel");
                 });
 
-            modelBuilder.Entity("PcAsCloud.CORE.Entities.Channel", b =>
+            modelBuilder.Entity("IronCore.CORE.Entities.Message", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                    b.HasOne("IronCore.CORE.Entities.Channel", "Channel")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<DateTime?>("ArchiveDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.HasOne("IronCore.CORE.Entities.AppUser", "SendedBy")
+                        .WithMany()
+                        .HasForeignKey("SendedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.HasOne("IronCore.CORE.Entities.Storage", "Storage")
+                        .WithMany()
+                        .HasForeignKey("StorageId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Property<bool>("IsArchived")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                    b.Navigation("Channel");
 
-                    b.Property<bool>("IsDirect")
-                        .HasColumnType("boolean");
+                    b.Navigation("SendedBy");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatedDate");
-
-                    b.HasIndex("IsArchived");
-
-                    b.HasIndex("IsDirect");
-
-                    b.ToTable("Channels", (string)null);
+                    b.Navigation("Storage");
                 });
 
-            modelBuilder.Entity("PcAsCloud.CORE.Entities.ChannelUser", b =>
+            modelBuilder.Entity("IronCore.CORE.Entities.Storage", b =>
                 {
-                    b.Property<Guid>("ChannelId")
-                        .HasColumnType("uuid");
+                    b.HasOne("IronCore.CORE.Entities.AppUser", "AppUser")
+                        .WithMany()
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<string>("AppUserId")
-                        .HasMaxLength(450)
-                        .HasColumnType("character varying(450)");
-
-                    b.Property<DateTime>("JoinedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("ChannelId", "AppUserId");
-
-                    b.HasIndex("AppUserId");
-
-                    b.HasIndex("JoinedDate");
-
-                    b.ToTable("ChannelUsers", (string)null);
-                });
-
-            modelBuilder.Entity("PcAsCloud.CORE.Entities.Message", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("ArchiveDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("ChannelId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Content")
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsArchived")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("SendedById")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("character varying(450)");
-
-                    b.Property<Guid?>("StorageId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ChannelId");
-
-                    b.HasIndex("CreatedDate");
-
-                    b.HasIndex("IsArchived");
-
-                    b.HasIndex("SendedById");
-
-                    b.HasIndex("StorageId");
-
-                    b.ToTable("Messages", (string)null);
-                });
-
-            modelBuilder.Entity("PcAsCloud.CORE.Entities.Storage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("AppUserId")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("character varying(450)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.HasIndex("CreatedDate");
-
-                    b.ToTable("Storages", (string)null);
+                    b.Navigation("AppUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -368,7 +424,7 @@ namespace PcAsCloud.DAL.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("PcAsCloud.CORE.Entities.AppUser", null)
+                    b.HasOne("IronCore.CORE.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -377,7 +433,7 @@ namespace PcAsCloud.DAL.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("PcAsCloud.CORE.Entities.AppUser", null)
+                    b.HasOne("IronCore.CORE.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -392,7 +448,7 @@ namespace PcAsCloud.DAL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PcAsCloud.CORE.Entities.AppUser", null)
+                    b.HasOne("IronCore.CORE.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -401,75 +457,19 @@ namespace PcAsCloud.DAL.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("PcAsCloud.CORE.Entities.AppUser", null)
+                    b.HasOne("IronCore.CORE.Entities.AppUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PcAsCloud.CORE.Entities.ChannelUser", b =>
-                {
-                    b.HasOne("PcAsCloud.CORE.Entities.AppUser", "AppUser")
-                        .WithMany("ChannelUsers")
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PcAsCloud.CORE.Entities.Channel", "Channel")
-                        .WithMany("ChannelUsers")
-                        .HasForeignKey("ChannelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
-
-                    b.Navigation("Channel");
-                });
-
-            modelBuilder.Entity("PcAsCloud.CORE.Entities.Message", b =>
-                {
-                    b.HasOne("PcAsCloud.CORE.Entities.Channel", "Channel")
-                        .WithMany("Messages")
-                        .HasForeignKey("ChannelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PcAsCloud.CORE.Entities.AppUser", "SendedBy")
-                        .WithMany()
-                        .HasForeignKey("SendedById")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("PcAsCloud.CORE.Entities.Storage", "Storage")
-                        .WithMany()
-                        .HasForeignKey("StorageId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Channel");
-
-                    b.Navigation("SendedBy");
-
-                    b.Navigation("Storage");
-                });
-
-            modelBuilder.Entity("PcAsCloud.CORE.Entities.Storage", b =>
-                {
-                    b.HasOne("PcAsCloud.CORE.Entities.AppUser", "AppUser")
-                        .WithMany()
-                        .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AppUser");
-                });
-
-            modelBuilder.Entity("PcAsCloud.CORE.Entities.AppUser", b =>
+            modelBuilder.Entity("IronCore.CORE.Entities.AppUser", b =>
                 {
                     b.Navigation("ChannelUsers");
                 });
 
-            modelBuilder.Entity("PcAsCloud.CORE.Entities.Channel", b =>
+            modelBuilder.Entity("IronCore.CORE.Entities.Channel", b =>
                 {
                     b.Navigation("ChannelUsers");
 
