@@ -2,7 +2,7 @@
 using SearchService.BL.MessageBroker.Interfaces;
 
 namespace SearchService.API.Extensions;
-public class RabbitMqConsumerBackgroundService(IServiceProvider _provider, ILogger _logger) : BackgroundService
+public class RabbitMqConsumerBackgroundService(IServiceProvider _provider, ILogger<RabbitMqConsumerBackgroundService> _logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
