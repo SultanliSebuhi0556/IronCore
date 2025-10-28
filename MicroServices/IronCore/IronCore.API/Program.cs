@@ -1,4 +1,3 @@
-using IronCore.API;
 using IronCore.API.Extensions;
 using SwaggerThemes;
 

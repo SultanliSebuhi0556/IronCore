@@ -5,8 +5,10 @@ using IronCore.BL.ExternalServices.Instances;
 using IronCore.BL.Services.Implements;
 using IronCore.BL.Services.Instances;
 using IronCore.CORE.Options;
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace IronCore.BL;
 public static class ServiceRegistrationsBL
@@ -16,6 +18,7 @@ public static class ServiceRegistrationsBL
         services.AddHttpContextAccessor();
         services.AddScopes();
         services.AddCustomOptions(configuration);
+        services.AddMassTransitConfiguration();
         services.AddFluentValidation();
         return services;
     }
@@ -23,6 +26,20 @@ public static class ServiceRegistrationsBL
     {
         services.Configure<JWTOptions>(configuration.GetSection($"ExternalServices:{nameof(JWTOptions)}"));
         services.Configure<RabbitMQOptions>(configuration.GetSection($"ExternalServices:{nameof(RabbitMQOptions)}"));
+        return services;
+    }
+    private static IServiceCollection AddMassTransitConfiguration(this IServiceCollection services)
+    {
+        services.AddMassTransit(opt =>
+        {
+            opt.SetDefaultEndpointNameFormatter();
+            opt.AddConsumers(typeof(ServiceRegistrationsBL).Assembly);
+            opt.UsingRabbitMq((context, config) =>
+            {
+                var options = context.GetRequiredService<IOptions<RabbitMQOptions>>().Value;
+                config.Host(options.Uri);
+            });
+        });
         return services;
     }
     private static IServiceCollection AddScopes(this IServiceCollection services)
@@ -33,7 +50,6 @@ public static class ServiceRegistrationsBL
         services.AddScoped<ITokenGenerator, TokenGenerator>();
         services.AddScoped<IFileHelper, FileHelper>();
         services.AddScoped<IStorageService, StorageService>();
-        services.AddScoped<IRabbitMQPublisher, RabbitMQPublisher>();
         return services;
     }
     private static void AddFluentValidation(this IServiceCollection services)

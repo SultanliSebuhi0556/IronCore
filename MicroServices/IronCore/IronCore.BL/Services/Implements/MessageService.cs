@@ -1,16 +1,16 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using IronCore.BL.DTOs.Message;
-using IronCore.BL.DTOs.RabbitMQDTOs;
 using IronCore.BL.Exceptions.CommonExceptions;
-using IronCore.BL.ExternalServices.Instances;
 using IronCore.BL.Services.Instances;
 using IronCore.CORE.Entities;
 using IronCore.CORE.Enums;
 using IronCore.DAL.Context;
+using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SharedDTOs.DTOs;
 using System.Text.Json;
 
 namespace IronCore.BL.Services.Implements;
@@ -20,7 +20,8 @@ public class MessageService(
     IHttpContextAccessor _httpContextAccessor,
     UserManager<AppUser> _userManager,
     IValidator<MessageCreateDTO> _validator,
-    IRabbitMQPublisher _publisher,
+    //IRabbitMQPublisher _publisher,
+    IBus _bus,
     IMapper _mapper) : IMessageService
 {
     public async Task<MessageCreateResponseDTO?> CreateMessageAsync(MessageCreateDTO dto, CancellationToken cancellationToken)
@@ -53,9 +54,8 @@ public class MessageService(
             StorageId = message.StorageId?.ToString(),
             SendedById = message.SendedById
         };
-        var json = JsonSerializer.Serialize(messageDto);
-        await _publisher.PublishMessagesAsync(json, "message.create", cancellationToken);
 
+        await _bus.Publish(messageDto, cancellationToken);
         var response = new MessageCreateResponseDTO { Id = message.Id.ToString() };
 
         if (dto.File != null)
@@ -99,8 +99,9 @@ public class MessageService(
         var rolesOfUser = await _userManager.GetRolesAsync(user);
         if (target.SendedById != user.Id && !rolesOfUser.Contains(nameof(UserRoles.Admin))) throw new Exception("cant delete this message "); //TODO: ex
 
-        var json = JsonSerializer.Serialize(target.Id.ToString());
-        await _publisher.PublishMessagesAsync(json, "message.delete", cancellationToken);
+        //var json = JsonSerializer.Serialize(target.Id.ToString());
+        //await _publisher.PublishMessagesAsync(json, "message.delete", cancellationToken);
+        await _bus.Publish(target.Id.ToString(), cancellationToken);
 
         await Task.Run(() => _context.Remove(target));
         await _context.SaveChangesAsync(cancellationToken);

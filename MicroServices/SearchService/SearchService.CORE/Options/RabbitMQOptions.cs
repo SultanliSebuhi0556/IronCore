@@ -1,6 +1,5 @@
 ﻿namespace SearchService.CORE.Options;
-public class RabbitMQOptions
+public record RabbitMQOptions
 {
     public string Uri { get; set; }
-    public IEnumerable<RabbitMQQueueOptions> Queues { get; set; }
 }

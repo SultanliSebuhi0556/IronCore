@@ -1,4 +1,4 @@
-﻿namespace IronCore.BL.DTOs.RabbitMQDTOs;
+﻿namespace SharedDTOs.DTOs;
 public record MessageDTO
 {
     public string Id { get; set; }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Options;
-using RabbitMQ.Client;
 using SearchService.CORE.Options;
 using SearchService.CORE.RepositoryInstances;
 
@@ -14,17 +13,17 @@ public static class ApplicationExtensions
             var elasticRepo = scope.ServiceProvider.GetRequiredService<IMessageRepository>();
             await elasticRepo.CreateIndexIfNotExistAsync(elasticOption.Value.DefaultIndex, CancellationToken.None);
 
-            var rabbitOption = scope.ServiceProvider.GetRequiredService<IOptions<RabbitMQOptions>>();
-            var channel = scope.ServiceProvider.GetRequiredService<IChannel>();
-            foreach (var queue in rabbitOption.Value.Queues)
-            {
-                await channel.QueueDeclareAsync(
-                    queue: queue.Name,
-                    durable: queue.Durable,
-                    exclusive: queue.Exclusive,
-                    autoDelete: queue.AutoDelete,
-                    arguments: null);
-            }
+            //var rabbitOption = scope.ServiceProvider.GetRequiredService<IOptions<RabbitMQOptions>>();
+            //var channel = scope.ServiceProvider.GetRequiredService<IChannel>();
+            //foreach (var queue in rabbitOption.Value.Queues)
+            //{
+            //    await channel.QueueDeclareAsync(
+            //        queue: queue.Name,
+            //        durable: queue.Durable,
+            //        exclusive: queue.Exclusive,
+            //        autoDelete: queue.AutoDelete,
+            //        arguments: null);
+            //}
         }
     }
 }
