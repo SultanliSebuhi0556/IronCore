@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using SearchService.CORE.Entities;
 using SearchService.CORE.Options;
 using SearchService.CORE.RepositoryInstances;
+using System.Text.Json;
 
 namespace SearchService.DAL.RepositoryImplements;
 public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity, new()
@@ -40,14 +41,19 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity, 
         return response.IsValidResponse;
     }
 
-    public async Task<IEnumerable<T>> GetAsync(string? searchText, string? indexName, CancellationToken cancellationToken)
+    public async Task<string> GetAsync(string channelId, string? searchText, string? indexName, CancellationToken cancellationToken)
     {
-        var searchRequest = new SearchRequest("messages")
-        {
-            Query = string.IsNullOrWhiteSpace(searchText) ? new MatchAllQuery() : new MatchQuery { Field = "content", Query = searchText }
-        };
-        var response = await _client.SearchAsync<T>(searchRequest, cancellationToken);
-        return response.IsValidResponse ? response.Documents : Enumerable.Empty<T>();
+        if (string.IsNullOrWhiteSpace(indexName)) indexName = "messages";
+
+        var queries = new List<Query> { new MatchQuery { Field = "channelId.keyword", Query = channelId } };
+
+        if (!string.IsNullOrWhiteSpace(searchText))
+            queries.Add(new WildcardQuery { Field = "content.keyword", Value = $"*{searchText}*" });
+
+        var request = new SearchRequest(indexName) { Query = new BoolQuery { Must = queries } };
+
+        var response = await _client.SearchAsync<T>(request, cancellationToken);
+        return JsonSerializer.Serialize(response.Documents);
     }
 
     public async Task<bool> RemoveAsync(string key, string? indexName, CancellationToken cancellationToken)

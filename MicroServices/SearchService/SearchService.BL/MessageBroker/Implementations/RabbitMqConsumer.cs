@@ -13,18 +13,22 @@ public class RabbitMqConsumer(IMessageElasticService _messageService, IChannel _
     public async Task ConsumeMessagesAsync(string queueName, Func<string, Task> messageHandler, CancellationToken cancellationToken)
     {
         var consumer = new AsyncEventingBasicConsumer(_channel);
-
         consumer.ReceivedAsync += async (sender, eventArgs) =>
         {
-            var messageJson = Encoding.UTF8.GetString(eventArgs.Body.ToArray());
+            var data = Encoding.UTF8.GetString(eventArgs.Body.ToArray());
             try
             {
-                var message = JsonSerializer.Deserialize<Message>(messageJson);
-                if (message != null)
+                if (queueName == "message.create")
                 {
-                    await _messageService.AddOrUpdateMessageAsync(message, cancellationToken);
-                    await messageHandler(messageJson);
+                    var message = JsonSerializer.Deserialize<Message>(data);
+                    if (message != null) await _messageService.AddOrUpdateMessageAsync(message, cancellationToken);
                 }
+                if (queueName == "message.delete")
+                {
+                    var key = JsonSerializer.Deserialize<string>(data);
+                    if (key != null) await _messageService.RemoveAsync(key, cancellationToken);
+                }
+                await messageHandler(data);
                 await _channel.BasicAckAsync(eventArgs.DeliveryTag, multiple: false, cancellationToken);
             }
             catch (Exception ex)

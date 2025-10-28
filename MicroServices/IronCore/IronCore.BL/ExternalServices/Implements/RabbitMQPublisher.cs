@@ -13,8 +13,5 @@ public class RabbitMQPublisher(IChannel _channel) : IRabbitMQPublisher
             routingKey: routingKey,
             mandatory: true,
             basicProperties: new BasicProperties { Persistent = true }, body: body, cancellationToken);
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine($"Message sent - {message}");
-        Console.ResetColor();
     }
 }

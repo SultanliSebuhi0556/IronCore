@@ -23,7 +23,6 @@ public class MessageService(
     IRabbitMQPublisher _publisher,
     IMapper _mapper) : IMessageService
 {
-    private const string _routingKey = "message";
     public async Task<MessageCreateResponseDTO?> CreateMessageAsync(MessageCreateDTO dto, CancellationToken cancellationToken)
     {
         await _validator.ValidateAndThrowAsync(dto, cancellationToken);
@@ -55,7 +54,7 @@ public class MessageService(
             SendedById = message.SendedById
         };
         var json = JsonSerializer.Serialize(messageDto);
-        await _publisher.PublishMessagesAsync(json, _routingKey, cancellationToken);
+        await _publisher.PublishMessagesAsync(json, "message.create", cancellationToken);
 
         var response = new MessageCreateResponseDTO { Id = message.Id.ToString() };
 
@@ -100,6 +99,9 @@ public class MessageService(
         var rolesOfUser = await _userManager.GetRolesAsync(user);
         if (target.SendedById != user.Id && !rolesOfUser.Contains(nameof(UserRoles.Admin))) throw new Exception("cant delete this message "); //TODO: ex
 
+        var json = JsonSerializer.Serialize(target.Id.ToString());
+        await _publisher.PublishMessagesAsync(json, "message.delete", cancellationToken);
+
         await Task.Run(() => _context.Remove(target));
         await _context.SaveChangesAsync(cancellationToken);
     }
@@ -141,5 +143,14 @@ public class MessageService(
         var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext!.User);
         if (user == null) throw new NotFoundException<AppUser>();
         return user;
+    }
+
+    public async Task<IEnumerable<MessageGetDTO>> GetMessageBySearchAsync(string channelId, string searchText, CancellationToken cancellationToken)
+    {
+        var client = new HttpClient(new HttpClientHandler { ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator });
+        var url = $"https://localhost:7173/api/Message/GetMessages?channelId={Uri.EscapeDataString(channelId)}&searchText={Uri.EscapeDataString(searchText)}";
+        var result = await client.GetStringAsync(url);
+        if (result == "[]") throw new NotFoundException<MessageGetDTO>();
+        return JsonSerializer.Deserialize<IEnumerable<MessageGetDTO>>(result)!;
     }
 }
