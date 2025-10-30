@@ -19,15 +19,11 @@ public class MessageService(
     IStorageService _storageService,
     IHttpContextAccessor _httpContextAccessor,
     UserManager<AppUser> _userManager,
-    IValidator<MessageCreateDTO> _validator,
-    //IRabbitMQPublisher _publisher,
     IBus _bus,
     IMapper _mapper) : IMessageService
 {
-    public async Task<MessageCreateResponseDTO?> CreateMessageAsync(MessageCreateDTO dto, CancellationToken cancellationToken)
+    public async Task<MessageCreateResponseDTO?> CreateMessageAsync(DTOs.Message.MessageCreateDTO dto, CancellationToken cancellationToken)
     {
-        await _validator.ValidateAndThrowAsync(dto, cancellationToken);
-
         var user = await _getCurrentUserAsync();
 
         var message = new Message
@@ -45,7 +41,7 @@ public class MessageService(
 
         await _context.AddAsync(message, cancellationToken);
 
-        var messageDto = new MessageDTO
+        var messageDto = new SharedDTOs.DTOs.MessageCreateDTO
         {
             Id = message.Id.ToString(),
             Content = message.Content,
@@ -99,9 +95,8 @@ public class MessageService(
         var rolesOfUser = await _userManager.GetRolesAsync(user);
         if (target.SendedById != user.Id && !rolesOfUser.Contains(nameof(UserRoles.Admin))) throw new Exception("cant delete this message "); //TODO: ex
 
-        //var json = JsonSerializer.Serialize(target.Id.ToString());
-        //await _publisher.PublishMessagesAsync(json, "message.delete", cancellationToken);
-        await _bus.Publish(target.Id.ToString(), cancellationToken);
+        var messageDto = new MessageDeleteDTO { Id = id };
+        await _bus.Publish(messageDto, cancellationToken);
 
         await Task.Run(() => _context.Remove(target));
         await _context.SaveChangesAsync(cancellationToken);

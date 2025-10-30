@@ -1,5 +1,5 @@
 ﻿namespace SharedDTOs.DTOs;
-public record MessageDTO
+public record MessageCreateDTO
 {
     public string Id { get; set; }
     public string? Content { get; set; }
